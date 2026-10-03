@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AuthenticationError, AuthorizationError } from "../lib/errors";
+import { sessionRepository } from "../modules/auth/infrastructure/InMemorySessionRepository";
 
 export interface AuthenticatedPrincipal {
   userId: string;
@@ -7,46 +8,44 @@ export interface AuthenticatedPrincipal {
   roles: string[];
 }
 
-export function authenticationMiddleware(req: Request, _res: Response, next: NextFunction) {
+export async function authenticationMiddleware(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.get("authorization");
-
   if (!authHeader) {
     req.user = undefined;
-    return next();
+    next();
+    return;
   }
 
   const [scheme, token] = authHeader.split(" ");
   if (scheme !== "Bearer" || !token) {
-    throw new AuthenticationError("Invalid authorization header");
+    next(new AuthenticationError("Invalid authorization header"));
+    return;
   }
 
-  if (token === "mock-session-token") {
-    req.user = {
-      userId: "user-1",
-      authProvider: "mock",
-      roles: ["user"],
-    } satisfies AuthenticatedPrincipal;
-    return next();
+  const session = await sessionRepository.findByToken(token);
+  if (!session) {
+    next(new AuthenticationError("Authentication failed"));
+    return;
   }
 
-  throw new AuthenticationError("Authentication failed");
-}
-
-export function requireAuthentication(req: Request, _res: Response, next: NextFunction) {
-  if (!req.user) {
-    throw new AuthenticationError();
-  }
-
+  req.user = { userId: session.userId, authProvider: "mock", roles: ["user"] };
   next();
 }
 
-export function requireOwnership(req: Request, _res: Response, next: NextFunction) {
+export function requireAuthentication(req: Request, _res: Response, next: NextFunction): void {
+  if (!req.user) {
+    next(new AuthenticationError());
+    return;
+  }
+  next();
+}
+
+export function requireOwnership(req: Request, _res: Response, next: NextFunction): void {
   const principal = req.user;
   const requestedUserId = req.params.userId ?? req.params.id;
-
   if (!principal || !requestedUserId || principal.userId !== requestedUserId) {
-    throw new AuthorizationError("User does not have access to the requested resource");
+    next(new AuthorizationError("User does not have access to the requested resource"));
+    return;
   }
-
   next();
 }

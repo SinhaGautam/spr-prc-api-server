@@ -1,56 +1,55 @@
-import { logger } from "../../../lib/logger";
+import { randomUUID } from "node:crypto";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import { ConflictError } from "../../../lib/errors";
+import type { CreateMeditationSessionRequest } from "../contracts/MeditationRequest";
+import type { MeditationRepository } from "./MeditationRepository";
+import { MeditationSessionEntity } from "../entities/MeditationSessionEntity";
+import type { PracticeCompletionPort } from "../../daily-practice/application/PracticeCompletionPort";
 
-const meditationPresets = [
-  { id: "preset-5", key: "five_minutes", durationMinutes: 5 },
-  { id: "preset-10", key: "ten_minutes", durationMinutes: 10 },
-  { id: "preset-15", key: "fifteen_minutes", durationMinutes: 15 },
-  { id: "preset-20", key: "twenty_minutes", durationMinutes: 20 },
-] as const;
+export class MeditationService extends BaseApiService {
+  constructor(
+    private readonly repository: MeditationRepository,
+    private readonly completionPort: PracticeCompletionPort,
+  ) { super(); }
 
-const sessionStore = new Map<string, Array<Record<string, unknown>>>();
-
-export class MeditationService {
   async listPresets() {
-    try {
-      return { items: meditationPresets.map((preset) => ({ id: preset.id, key: preset.key, durationMinutes: preset.durationMinutes })) };
-    } catch (error) {
-      logger.error({ err: error }, "Failed to list meditation presets");
-      throw error;
-    }
+    return this.execute("meditation.listPresets", async () => {
+      const presets = await this.repository.listPresets();
+      return { items: presets.map((item) => ({ id: String(item._id), key: item.key, durationMinutes: item.durationMinutes })) };
+    });
   }
 
-  async createSession(userId: string, payload: { presetId?: string; plannedMinutes: number; actualSeconds: number; startedAt: string; endedAt?: string; completed: boolean; completionReason?: "completed" | "interrupted" | "cancelled"; clientSessionId: string }) {
-    try {
-      const list = sessionStore.get(userId) ?? [];
-      const duplicate = list.find((item) => item.clientSessionId === payload.clientSessionId);
-      if (duplicate) {
-        logger.info({ userId, clientSessionId: payload.clientSessionId }, "Duplicate meditation session ignored");
-        return { session: duplicate, idempotent: true };
+  async createSession(userId: string, request: CreateMeditationSessionRequest) {
+    return this.execute("meditation.createSession", async () => {
+      const existing = await this.repository.findSessionByClientSessionId(userId, request.clientSessionId);
+      if (existing) return { session: this.toResponse(existing), idempotent: true };
+      if (request.actualSeconds > request.plannedMinutes * 60) throw new ConflictError("Meditation duration exceeds planned duration");
+
+      const session = new MeditationSessionEntity(
+        randomUUID(), userId, request.plannedMinutes, request.actualSeconds,
+        new Date(request.startedAt), request.completed, request.clientSessionId,
+        request.presetId, request.endedAt ? new Date(request.endedAt) : undefined, request.completionReason,
+      );
+      const saved = await this.repository.createSession(session);
+      if (saved.completed && saved.completionReason === "completed") {
+        await this.completionPort.recordMeditationCompletion(userId, Math.floor(saved.actualSeconds / 60));
       }
-
-      const session = {
-        id: `meditation-session-${Date.now()}`,
-        userId,
-        ...payload,
-        createdAt: new Date().toISOString(),
-      };
-
-      list.push(session);
-      sessionStore.set(userId, list);
-      logger.info({ userId, sessionId: session.id }, "Meditation session created");
-      return { session, idempotent: false };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to create meditation session");
-      throw error;
-    }
+      return { session: this.toResponse(saved), idempotent: false };
+    }, { userId, clientSessionId: request.clientSessionId });
   }
 
   async listSessions(userId: string) {
-    try {
-      return { items: sessionStore.get(userId) ?? [] };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to list meditation sessions");
-      throw error;
-    }
+    return this.execute("meditation.listSessions", async () => ({
+      items: (await this.repository.listSessions(userId)).map((item) => this.toResponse(item)),
+    }), { userId });
+  }
+
+  private toResponse(session: MeditationSessionEntity) {
+    return {
+      id: session._id, userId: session.userId, plannedMinutes: session.plannedMinutes,
+      actualSeconds: session.actualSeconds, startedAt: session.startedAt.toISOString(),
+      endedAt: session.endedAt?.toISOString(), completed: session.completed,
+      completionReason: session.completionReason, clientSessionId: session.clientSessionId,
+    };
   }
 }

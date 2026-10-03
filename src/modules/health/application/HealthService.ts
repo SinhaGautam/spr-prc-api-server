@@ -1,28 +1,18 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import { getDatabase } from "../../../infrastructure/mongodb/MongoDatabase";
 
-export class HealthService {
+export class HealthService extends BaseApiService {
   async getLive() {
-    try {
-      return { status: "ok" };
-    } catch (error) {
-      logger.error({ err: error }, "Failed to report live health");
-      throw error;
-    }
+    return this.execute("health.live", async () => ({ status: "ok" as const }));
   }
 
   async getReady() {
-    try {
+    return this.execute("health.ready", async () => {
+      const mongo = getDatabase();
       return {
-        status: "ready",
-        checks: {
-          api: "ok",
-          mongo: "not_configured",
-          objectStorage: "not_configured",
-        },
+        status: mongo ? ("ready" as const) : ("degraded" as const),
+        checks: { api: "ok" as const, mongo: mongo ? ("ok" as const) : ("not_configured" as const) },
       };
-    } catch (error) {
-      logger.error({ err: error }, "Failed to report ready health");
-      throw error;
-    }
+    });
   }
 }

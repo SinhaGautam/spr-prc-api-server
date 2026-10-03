@@ -1,34 +1,25 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import type { ContentService } from "../../content/application/ContentService";
+import type { MeditationService } from "../../meditation/application/MeditationService";
 
-export class BootstrapService {
+export class BootstrapService extends BaseApiService {
+  constructor(
+    private readonly contentService: ContentService,
+    private readonly meditationService: MeditationService,
+  ) { super(); }
+
   async getBootstrapData() {
-    try {
-      const payload = {
-        traditions: [
-          { id: "trad-hindu", key: "hindu", name: "Hindu", status: "active" },
-          { id: "trad-jain", key: "jain", name: "Jain", status: "active" },
-        ],
-        focuses: [
-          { id: "focus-ram", key: "ram", name: "Ram", traditionIds: ["trad-hindu"], status: "active" },
-          { id: "focus-krishna", key: "krishna", name: "Krishna", traditionIds: ["trad-hindu"], status: "active" },
-          { id: "focus-mahavira", key: "mahavira", name: "Mahavira", traditionIds: ["trad-jain"], status: "active" },
-        ],
-        practices: ["naam_jap", "meditation"],
-        meditationPresets: [
-          { id: "preset-5", key: "five_minutes", durationMinutes: 5, status: "active" },
-          { id: "preset-10", key: "ten_minutes", durationMinutes: 10, status: "active" },
-          { id: "preset-15", key: "fifteen_minutes", durationMinutes: 15, status: "active" },
-          { id: "preset-20", key: "twenty_minutes", durationMinutes: 20, status: "active" },
-        ],
+    return this.execute("bootstrap.getBootstrapData", async () => {
+      const catalog = await this.contentService.getCatalog();
+      const presets = await this.meditationService.listPresets();
+      return {
+        traditions: catalog.traditions,
+        focuses: catalog.focuses,
+        practices: ["naam_jap", "meditation"] as ["naam_jap", "meditation"],
+        meditationPresets: presets.items,
         languages: ["en", "hi"],
         reminderDefaults: { enabled: false, localTime: "07:00" },
       };
-
-      logger.debug("Bootstrapping onboarding catalog");
-      return payload;
-    } catch (error) {
-      logger.error({ err: error }, "Failed to resolve bootstrap data");
-      throw error;
-    }
+    });
   }
 }

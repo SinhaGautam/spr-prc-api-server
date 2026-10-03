@@ -1,34 +1,25 @@
 export const v1OpenApiDocument = {
   openapi: "3.1.0",
-  info: {
-    title: "Bhakti App API",
-    version: "0.1.0",
-  },
+  info: { title: "Bhakti App API", version: "1.0.0" },
   servers: [{ url: "/api/v1" }],
   paths: {
-    "/health/live": {
-      get: {
-        summary: "Liveness check",
-        responses: {
-          "200": { description: "The process is alive" },
-        },
-      },
-    },
-    "/bootstrap": {
-      get: {
-        summary: "Bootstrap onboarding data",
-        responses: {
-          "200": { description: "Bootstrap payload for mobile onboarding" },
-        },
-      },
-    },
-    "/home/today": {
-      get: {
-        summary: "Today view model",
-        responses: {
-          "200": { description: "Daily summary view model" },
-        },
-      },
-    },
+    "/auth/session": { post: { summary: "Create session" }, delete: { summary: "Revoke session" } },
+    "/bootstrap": { get: { summary: "Onboarding catalog" } },
+    "/home/today": { get: { summary: "Today view" } },
+    "/me": { get: { summary: "Get user profile" }, put: { summary: "Update user profile" } },
+    "/me/preferences": { get: { summary: "Get preferences" }, put: { summary: "Update preferences" } },
+    "/mantras": { get: { summary: "List published mantras" } },
+    "/naam-jap/sessions": { post: { summary: "Create Naam Jap session" }, get: { summary: "List Naam Jap sessions" } },
+    "/meditation/presets": { get: { summary: "List meditation presets" } },
+    "/meditation/sessions": { post: { summary: "Create meditation session" }, get: { summary: "List meditation sessions" } },
+    "/goals/today": { get: { summary: "Get today's goals" } },
+    "/progress/today": { get: { summary: "Get today's progress" } },
+    "/progress/history": { get: { summary: "Get progress history" } },
+    "/progress/streak": { get: { summary: "Get progress streak" } },
+    "/me/reminder": { put: { summary: "Update reminder" } },
+    "/devices": { post: { summary: "Register device" } },
+    "/devices/{deviceId}": { delete: { summary: "Remove device" } },
+    "/health/live": { get: { summary: "Liveness check" } },
+    "/health/ready": { get: { summary: "Readiness check" } },
   },
 };

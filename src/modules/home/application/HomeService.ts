@@ -1,23 +1,36 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import type { DailyPracticeService } from "../../daily-practice/application/DailyPracticeService";
+import type { MeditationService } from "../../meditation/application/MeditationService";
+import type { NaamJapService } from "../../naam-jap/application/NaamJapService";
 
-export class HomeService {
-  async getTodayView() {
-    try {
-      const payload = {
+export class HomeService extends BaseApiService {
+  constructor(
+    private readonly dailyPracticeService: DailyPracticeService,
+    private readonly meditationService: MeditationService,
+    private readonly naamJapService: NaamJapService,
+  ) { super(); }
+
+  async getTodayView(userId: string) {
+    return this.execute("home.getTodayView", async () => {
+      const [goals, presets, mantras] = await Promise.all([
+        this.dailyPracticeService.getGoalsToday(userId),
+        this.meditationService.listPresets(),
+        this.naamJapService.listMantras(),
+      ]);
+      const preset = presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? { id: "preset-15", durationMinutes: 15 };
+      const mantra = mantras.items[0] ?? { id: "mantra-1", name: "Hari Naam", text: "Hare Krishna" };
+
+      return {
         greeting: "May your practice be gentle and steady.",
-        dailyGoals: [
-          { practice: "naam_jap", targetLabel: "108 repetitions", progress: 32, complete: false },
-          { practice: "meditation", targetLabel: "15 minutes", progress: 15, complete: true },
-        ],
-        defaultMantra: { id: "mantra-hari", name: "Hari Naam", text: "Hare Krishna" },
-        meditationPreset: { id: "preset-15", durationMinutes: 15 },
+        dailyGoals: goals.goals.map((goal) => ({
+          practice: goal.practice,
+          targetLabel: goal.target,
+          progress: goal.progress,
+          complete: goal.complete,
+        })),
+        defaultMantra: mantra,
+        meditationPreset: preset,
       };
-
-      logger.debug("Resolved home today view");
-      return payload;
-    } catch (error) {
-      logger.error({ err: error }, "Failed to resolve home today view");
-      throw error;
-    }
+    }, { userId });
   }
 }

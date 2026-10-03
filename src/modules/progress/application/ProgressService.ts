@@ -1,44 +1,18 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import type { ProgressRepository } from "./ProgressRepository";
 
-export class ProgressService {
+export class ProgressService extends BaseApiService {
+  constructor(private readonly repository: ProgressRepository) { super(); }
+
   async getToday(userId: string) {
-    try {
-      const date = new Date().toISOString();
-      return {
-        date,
-        completed: false,
-        goals: [
-          { practice: "naam_jap", complete: false },
-          { practice: "meditation", complete: true },
-        ],
-      };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve today progress");
-      throw error;
-    }
+    return this.execute("progress.getToday", () => this.repository.getToday(userId, new Date().toISOString().slice(0, 10)), { userId });
   }
 
   async getHistory(userId: string, month?: string) {
-    try {
-      return {
-        month: month ?? "2026-09",
-        items: [
-          { date: "2026-09-08", complete: true },
-          { date: "2026-09-09", complete: false },
-        ],
-      };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve progress history");
-      throw error;
-    }
+    return this.execute("progress.getHistory", () => this.repository.getHistory(userId, month ?? new Date().toISOString().slice(0, 7)), { userId, month });
   }
 
   async getStreak(userId: string) {
-    try {
-      return { current: 2, longest: 5 };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve streak");
-      throw error;
-    }
+    return this.execute("progress.getStreak", () => this.repository.getStreak(userId), { userId });
   }
 }
