@@ -1,5 +1,5 @@
-import { DailyGoalSnapshot } from "../../../shared/domain/entities";
+import type { DailyGoalSnapshotEntity } from "../entities/DailyGoalSnapshotEntity";
 
-export type DailyGoalSnapshotEntity = DailyGoalSnapshot;
+export type DailyGoalSnapshot = DailyGoalSnapshotEntity;
 
-export const dailyPracticeOrder = ["reading", "naam_jap", "meditation"] as const;
+export const dailyPracticeOrder = ["naam_jap", "meditation"] as const;
