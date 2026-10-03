@@ -19,7 +19,7 @@ test("V1 route registry does not register removed features", () => {
 
 test("V1 practice contracts contain only Naam Jap and meditation", () => {
   const types = fs.readFileSync(path.join(root, "src", "shared", "domain", "types.ts"), "utf8");
-  const preferences = fs.readFileSync(path.join(root, "src", "modules", "preferences", "routes.ts"), "utf8");
+  const preferences = fs.readFileSync(path.join(root, "src", "modules", "preferences", "schemas", "PreferencesSchema.ts"), "utf8");
   const bootstrap = fs.readFileSync(path.join(root, "src", "modules", "bootstrap", "application", "BootstrapService.ts"), "utf8");
   assert.doesNotMatch(types, /"reading"/);
   assert.doesNotMatch(preferences, /"reading"/);
