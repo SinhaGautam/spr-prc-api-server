@@ -34,7 +34,7 @@ function toDate(value: unknown): Date {
   return new Date(String(value));
 }
 
-function mapUser(doc: JsonDoc): User {
+function mapUser(doc: JsonDoc): UserEntity {
   return new UserEntity(
     String(doc._id ?? ""),
     String(doc.authProvider ?? ""),
@@ -49,7 +49,7 @@ function mapUser(doc: JsonDoc): User {
   );
 }
 
-function mapUserPreferences(doc: JsonDoc): UserPreferences {
+function mapUserPreferences(doc: JsonDoc): UserPreferencesEntity {
   return new UserPreferencesEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
@@ -68,7 +68,7 @@ function mapUserPreferences(doc: JsonDoc): UserPreferences {
   );
 }
 
-function mapMantra(doc: JsonDoc): Mantra {
+function mapMantra(doc: JsonDoc): MantraEntity {
   return new MantraEntity(
     String(doc._id ?? ""),
     String(doc.name ?? ""),
@@ -86,7 +86,7 @@ function mapMantra(doc: JsonDoc): Mantra {
   );
 }
 
-function mapMeditationPreset(doc: JsonDoc): MeditationPreset {
+function mapMeditationPreset(doc: JsonDoc): MeditationPresetEntity {
   return new MeditationPresetEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
@@ -101,7 +101,7 @@ function mapMeditationPreset(doc: JsonDoc): MeditationPreset {
   );
 }
 
-function mapMeditationSession(doc: JsonDoc): MeditationSession {
+function mapMeditationSession(doc: JsonDoc): MeditationSessionEntity {
   return new MeditationSessionEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
@@ -117,7 +117,7 @@ function mapMeditationSession(doc: JsonDoc): MeditationSession {
   );
 }
 
-function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshot {
+function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshotEntity {
   return new DailyGoalSnapshotEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
@@ -131,7 +131,7 @@ function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshot {
   );
 }
 
-function mapFocus(doc: JsonDoc): Focus {
+function mapFocus(doc: JsonDoc): FocusEntity {
   return new FocusEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
@@ -145,7 +145,7 @@ function mapFocus(doc: JsonDoc): Focus {
   );
 }
 
-function mapTag(doc: JsonDoc): Tag {
+function mapTag(doc: JsonDoc): TagEntity {
   return new TagEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
@@ -157,7 +157,7 @@ function mapTag(doc: JsonDoc): Tag {
   );
 }
 
-function mapMediaAsset(doc: JsonDoc): MediaAsset {
+function mapMediaAsset(doc: JsonDoc): MediaAssetEntity {
   return new MediaAssetEntity(
     String(doc._id ?? ""),
     String(doc.type ?? "audio") as MediaAssetEntity["type"],
@@ -173,7 +173,7 @@ function mapMediaAsset(doc: JsonDoc): MediaAsset {
   );
 }
 
-function mapTradition(doc: JsonDoc): Tradition {
+function mapTradition(doc: JsonDoc): TraditionEntity {
   return new TraditionEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
