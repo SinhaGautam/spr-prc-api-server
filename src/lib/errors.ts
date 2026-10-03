@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
 import { logger } from "../core/logging/Logger";
-import { failure } from "../core/http/ApiResponse";
 
 export class AppError extends Error {
   constructor(
@@ -39,5 +38,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
     logger.error({ requestId, route: req.originalUrl, method: req.method, statusCode, errorCode: code, err }, "Unexpected error");
   }
 
-  res.status(statusCode).json(failure({ code, message, requestId }));
+  res.status(statusCode).json({
+    error: { code, message, requestId },
+  });
 }
