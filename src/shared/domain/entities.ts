@@ -2,10 +2,8 @@ import type {
   ContentStatus,
   ObjectId,
   Practice,
-  Provenance,
   ReminderConfig,
   Timestamped,
-  UserPreferencesSnapshot,
   UserStatus,
 } from "./types";
 
@@ -33,7 +31,6 @@ export class UserPreferences implements Timestamped {
     public language: string,
     public reminder: ReminderConfig,
     public primaryFocusId?: ObjectId,
-    public readingTarget?: UserPreferencesSnapshot,
     public naamJapTarget?: { repetitions: number },
     public meditationTarget?: { minutes: number },
     public readonly createdAt: Date = new Date(),
@@ -75,46 +72,6 @@ export class Tag {
     public type: "theme" | "time" | "intent" | "festival",
     public status: ContentStatus,
     public readonly createdAt: Date = new Date(),
-    public readonly updatedAt: Date = new Date(),
-  ) {}
-}
-
-export class Reading {
-  constructor(
-    public readonly _id: ObjectId,
-    public title: string,
-    public subtitle: string | null,
-    public contentType:
-      | "scripture_excerpt"
-      | "prayer"
-      | "reflection"
-      | "story"
-      | "teaching",
-    public traditionIds: ObjectId[],
-    public focusIds: ObjectId[],
-    public tagIds: ObjectId[],
-    public language: string,
-    public body: string,
-    public estimatedMinutes: number,
-    public source: Provenance,
-    public status: ContentStatus,
-    public version: number,
-    public publishedAt?: Date,
-    public readonly createdAt: Date = new Date(),
-    public readonly updatedAt: Date = new Date(),
-  ) {}
-}
-
-export class ReadingProgress {
-  constructor(
-    public readonly _id: ObjectId,
-    public userId: ObjectId,
-    public readingId: ObjectId,
-    public progressPercent: number,
-    public completed: boolean,
-    public firstOpenedAt: Date,
-    public lastOpenedAt: Date,
-    public completedAt?: Date,
     public readonly updatedAt: Date = new Date(),
   ) {}
 }
@@ -191,27 +148,9 @@ export class DailyGoalSnapshot {
     public userId: ObjectId,
     public date: string,
     public enabledPractices: Practice[],
-    public readingComplete: boolean,
     public naamJapComplete: boolean,
     public meditationComplete: boolean,
     public allComplete: boolean,
-    public readonly createdAt: Date = new Date(),
-    public readonly updatedAt: Date = new Date(),
-  ) {}
-}
-
-export class Song {
-  constructor(
-    public readonly _id: ObjectId,
-    public title: string,
-    public language: string,
-    public traditionIds: ObjectId[],
-    public focusIds: ObjectId[],
-    public tagIds: ObjectId[],
-    public status: ContentStatus,
-    public durationSeconds: number,
-    public audioUrl: string,
-    public artworkUrl?: string,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
   ) {}
@@ -230,16 +169,6 @@ export class MediaAsset {
     public checksum?: string,
     public readonly createdAt: Date = new Date(),
     public readonly updatedAt: Date = new Date(),
-  ) {}
-}
-
-export class Favorite {
-  constructor(
-    public readonly _id: ObjectId,
-    public userId: ObjectId,
-    public entityType: "reading" | "song" | "mantra",
-    public entityId: ObjectId,
-    public readonly createdAt: Date = new Date(),
   ) {}
 }
 
