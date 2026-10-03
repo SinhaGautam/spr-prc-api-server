@@ -1,18 +1,9 @@
 import { Router, type IRouter } from "express";
-import { logger } from "../../lib/logger";
-import { BootstrapService } from "./application/BootstrapService";
+import { asyncHandler } from "../../middleware/AsyncHandler";
+import { BootstrapController } from "./controllers/BootstrapController";
 
-const router: IRouter = Router();
-const service = new BootstrapService();
-
-router.get("/", async (_req, res) => {
-  try {
-    const payload = await service.getBootstrapData();
-    res.json(payload);
-  } catch (error) {
-    logger.error({ err: error, endpoint: "bootstrap" }, "Controller error while loading bootstrap data");
-    throw error;
-  }
-});
-
-export default router;
+export function createBootstrapRoutes(controller: BootstrapController): IRouter {
+  const router = Router();
+  router.get("/", asyncHandler((req, res) => controller.get(req, res)));
+  return router;
+}
