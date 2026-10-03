@@ -7,30 +7,6 @@ Content quality is more important than content quantity.
 V1 should launch with a **small, curated, verified catalogue** rather
 than a huge ungoverned database.
 
-## Reading
-
-### Recommended V1 catalogue
-
-Start with: - short reflections - selected scripture excerpts - short
-devotional stories/teachings
-
-The first release does not need complete versions of every major
-scripture.
-
-### Reading length
-
-Prefer: - approximately 2--7 minutes for the primary daily reading -
-occasional longer items in the browse library
-
-### Source governance
-
-Every attributed/canonical item must have: - source title -
-author/tradition where applicable - reference/location - language -
-rights/licensing status - verification status - content version
-
-Do not publish uncertain religious text merely because it is available
-online.
-
 ## Mantras
 
 V1 should use a curated mantra/name library.
@@ -61,37 +37,6 @@ song catalogue dependency - no daily goal relation
 -   dozens of sound categories
 
 The timer must continue locally even if the network disappears.
-
-## Songs / Bhajans
-
-Songs are discovery/listening content.
-
-### Primary metadata
-
--   title
--   artist
--   language
--   tradition
--   optional focus
--   tags
--   duration
--   artwork
--   audio asset
--   publication state
-
-### Discovery dimensions
-
-Use a few useful filters: - language - tradition - devotional focus -
-theme/tag
-
-Avoid dozens of nested categories.
-
-### Example collections
-
-Curated collections can be: - Morning Bhakti - Rama - Krishna - Shiva -
-Hanuman - Jain Prayers - Peaceful - Festival
-
-These are **discovery collections**, not daily-goal categories.
 
 ## Media storage
 
