@@ -1,83 +1,31 @@
-# Offline & Synchronization Specification --- V1
+# Offline & Synchronization Specification — V1
 
 ## Goal
-
-A spiritual practice should not stop because the network is temporarily
-unavailable.
+Naam Jap and Meditation continue when connectivity is unavailable.
 
 ## Local data
-
-The mobile app should locally persist: - onboarding/preferences - cached
-published reading content - selected mantra - active Naam Jap
-counter/session - active meditation timer state - unsynced completed
-activity sessions 
-The backend remains authoritative after synchronization.
+- onboarding/preferences
+- selected mantra
+- active Naam Jap session
+- active meditation timer state
+- unsynced Naam Jap sessions
+- unsynced Meditation sessions
 
 ## Syncable activity records
-
-At minimum: - Naam Jap sessions - Meditation sessions - Reading
-completion/progress
+- Naam Jap sessions
+- Meditation sessions
 
 Every syncable write has a client-generated idempotency key.
 
 ## Sync protocol
-
-``` text
-Mobile
-  ↓
-Local write
-  ↓
-Sync queue
-  ↓
-POST API
-  ↓
-Server idempotency check
-  ↓
-Persist once
-  ↓
-Return canonical result
-  ↓
-Remove queue item
+```text
+Mobile → Local write → Sync queue → POST API → server idempotency check → persist once → canonical response → remove queue item
 ```
 
-On network failure: - retain queue item - retry later
-
-On server timeout: - retry with same idempotency key
-
-Never generate a new idempotency key for a retry of the same logical
-activity.
+Same logical activity retry uses the same key.
 
 ## Conflict policy
+Naam Jap and Meditation are append-like activities. Same key = same session; separate keys = separate sessions. Preferences may use last-write-wins with server timestamp/version for multi-device support.
 
-### removed content
-
-Server uses a deterministic rule: - completed wins over incomplete -
-otherwise latest valid progress update wins according to
-timestamp/version policy
-
-### Naam Jap
-
-Sessions are append-like. - duplicate key = same session - separate keys
-= separate sessions
-
-### Meditation
-
-Same as Naam Jap.
-
-### Preferences
-
-V1 can use last-write-wins with server timestamp/version if multi-device
-support exists.
-
-## Daily progress
-
-Daily progress is derived from accepted activities.
-
-The client may show optimistic progress, but after synchronization the
-server response is canonical.
-
-## No offline requirement
-
-The following do not need offline backend access: - content search
-against uncached catalogue - publishing/admin
-operations
+## Removed offline behavior
+No V1 sync queue, cache, or progress model exists for Reading, Songs, playback, or reading progress.
