@@ -40,12 +40,16 @@ export class UserService extends BaseApiService {
         }
 
         const updated = new UserEntity(
-          existing.id,
-          request.displayName ?? existing.displayName,
-          request.email ?? existing.email,
+          existing._id,
+          existing.authProvider,
+          existing.authSubject,
           request.timezone,
           request.language,
           existing.status,
+          request.displayName ?? existing.displayName,
+          request.email ?? existing.email,
+          existing.createdAt,
+          new Date(),
         );
 
         const saved = await this.userRepository.update(updated);
@@ -57,7 +61,7 @@ export class UserService extends BaseApiService {
 
   private toProfileResponse(user: UserEntity): UserProfileResponse {
     return {
-      id: user.id,
+      id: String(user._id),
       displayName: user.displayName,
       email: user.email,
       timezone: user.timezone,
