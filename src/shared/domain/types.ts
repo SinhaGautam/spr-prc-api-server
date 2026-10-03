@@ -13,11 +13,5 @@ export type Timestamped = {
   updatedAt: Date;
 };
 
-export type UserPreferencesTarget = {
-  type: "daily_item";
-};
-
-export type UserPreferencesSnapshot = { repetitions: number } | { minutes: number };
-
 export type MediaAssetType = "audio" | "image" | "document";
 export type MediaAssetStatus = "ready" | "processing" | "failed";
