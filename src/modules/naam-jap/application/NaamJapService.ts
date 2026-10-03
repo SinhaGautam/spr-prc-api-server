@@ -4,9 +4,13 @@ import { ConflictError, NotFoundError } from "../../../lib/errors";
 import type { CreateNaamJapSessionRequest } from "../contracts/NaamJapRequest";
 import { NaamJapSessionEntity } from "../entities/NaamJapSessionEntity";
 import type { NaamJapRepository } from "./NaamJapRepository";
+import type { PracticeCompletionPort } from "../../daily-practice/application/PracticeCompletionPort";
 
 export class NaamJapService extends BaseApiService {
-  constructor(private readonly repository: NaamJapRepository) { super(); }
+  constructor(
+    private readonly repository: NaamJapRepository,
+    private readonly completionPort: PracticeCompletionPort,
+  ) { super(); }
 
   async listMantras() {
     return this.execute("naamJap.listMantras", async () => ({
@@ -32,6 +36,7 @@ export class NaamJapService extends BaseApiService {
         request.endedAt ? new Date(request.endedAt) : undefined,
       );
       const saved = await this.repository.createSession(session);
+      if (saved.completed) await this.completionPort.recordNaamJapCompletion(userId, saved.completedRepetitions);
       return { session: this.toResponse(saved), idempotent: false };
     }, { userId, clientSessionId: request.clientSessionId });
   }
