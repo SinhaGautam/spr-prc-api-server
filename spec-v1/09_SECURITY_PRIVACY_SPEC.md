@@ -1,82 +1,29 @@
-# Security & Privacy Specification --- Backend V1
+# Security & Privacy Specification — Backend V1
 
 ## Authentication
-
-The selected authentication provider must support secure token/session
-handling.
-
-Backend requirements: - validate issuer/audience/signature where
-applicable - expire credentials appropriately - never log access
-tokens - never return password hashes
+Retain secure token/session validation, expiry/revocation, and secret redaction.
 
 ## Authorization
-
-For every user-owned resource:
-
-``` text
-authenticated principal
-        ↓
-resource ownership check
-        ↓
-authorized operation
-```
-
-A client must never be able to supply another user's ID to bypass
-ownership.
+All user-owned activity is scoped to the authenticated principal.
 
 ## Input validation
+Validate IDs, strings, enums, dates, times, durations, repetitions, targets, pagination, and supported practice types.
 
-Validate: - string length - enum values - ObjectId/public ID format -
-dates - durations - counts - pagination limits - filter values - content
-status transitions
-
-Reject unknown/unsupported state transitions.
-
-## Rate limiting
-
-V1 can use provider-level/API-gateway limits or application-level
-limits.
-
-Redis is not required solely for rate limiting at V1 scale.
-
-If distributed rate limiting becomes necessary, record an ADR before
-introducing Redis.
+V1 practice enum:
+```text
+naam_jap
+meditation
+```
+Reading/Song practice values must be rejected.
 
 ## Logging
+Do not log tokens, credentials, password hashes, unnecessary personal data, or private mantra text unless approved. Log requestId, route, method, status, duration, error category, and safe user identifier where operationally justified.
 
-Logs must not contain: - access tokens - password hashes - private
-authentication credentials - unnecessary personal data
-
-Log: - request correlation ID - route - status - duration - error
-category - safe user identifier/hash where operationally justified
-
-## Content administration
-
-Administrative content changes require: - authenticated admin -
-authorization - audit trail - explicit publish/archive action
-
-## Data minimisation
-
-V1 should avoid collecting: - location - contacts - microphone
-recordings - health information - precise behavioural telemetry
-unrelated to the product
+## Legacy-feature privacy
+Legacy Reading/Song/playback data must not be exposed by V1 mobile APIs. Temporary retention requires restricted migration/retention access outside the mobile API.
 
 ## Account deletion
+Cover profile, preferences, Naam Jap sessions, Meditation sessions, daily goals/progress, and device registrations. Handle legacy data according to approved migration policy.
 
-The backend must support a defined account deletion process.
-
-Deletion policy must specify: - user profile - preferences - removed legacy content
-progress - activity sessions - favorites - device registrations -
-playback history
-
-Content owned by the platform is not deleted when a user account is
-deleted.
-
-## Privacy documentation dependency
-
-Before App Store submission, map actual collected data and third-party
-SDK/provider behaviour to the current Apple privacy disclosure
-requirements and the app's privacy policy.
-
-Do not claim "no data collected" merely because the app does not
-intentionally collect analytics; verify SDK/provider behaviour.
+## Administration
+Admin content changes require auth, authorization, audit trail, and explicit publish/archive.
