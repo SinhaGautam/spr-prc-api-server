@@ -1,0 +1,23 @@
+{
+  "project": "Bhakti App Backend",
+  "version": "V1",
+  "method": "Specification-Driven Development",
+  "specs": [
+    "00_PROJECT_SPEC.md",
+    "01_MODULE_SPEC.md",
+    "01A_ENGINEERING_FOUNDATION_SPEC.md",
+    "02_DB_SCHEMA.md",
+    "03_API_SPEC.md",
+    "04_DOMAIN_RULES.md",
+    "05_CLASS_FUNCTION_SPEC.md",
+    "06_TEST_SPEC.md",
+    "07_CONTENT_SPEC.md",
+    "08_OFFLINE_SYNC_SPEC.md",
+    "09_SECURITY_PRIVACY_SPEC.md",
+    "10_IMPLEMENTATION_PLAN.md",
+    "11_ADR.md",
+    "05A_REQUEST_RESPONSE_MODEL_SPEC.md",
+    "05B_ERROR_LOGGING_TRACE_SPEC.md"
+  ],
+  "implementation_rule": "No endpoint is implemented without module-owned request/response models, Zod schemas, error contract, trace/logging contract, and tests."
+}
