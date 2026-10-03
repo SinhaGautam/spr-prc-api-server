@@ -1,9 +1,12 @@
+import { getDatabase } from "../../infrastructure/mongodb/MongoDatabase";
 import { ContentService } from "./application/ContentService";
 import { ContentController } from "./controllers/ContentController";
 import { InMemoryContentRepository } from "./infrastructure/InMemoryContentRepository";
+import { MongoContentRepository } from "./infrastructure/MongoContentRepository";
 import { createContentRoutes } from "./routes";
 
-const repository = new InMemoryContentRepository();
+const database = getDatabase();
+const repository = database ? new MongoContentRepository(database) : new InMemoryContentRepository();
 const service = new ContentService(repository);
 const controller = new ContentController(service);
 
