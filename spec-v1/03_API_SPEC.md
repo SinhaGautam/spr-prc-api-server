@@ -1,187 +1,80 @@
-# API Specification --- V1
+# API Specification — Backend V1
 
 ## API conventions
+Base path: `/api/v1`
 
-Base path:
+Authentication derives current user from the authenticated principal; never trust client-supplied `userId`.
 
-``` text
-/api/v1
-```
-
-Authentication: - authenticated user is derived from access token -
-never trust client-supplied `userId`
-
-Content endpoints are public only if product explicitly decides so; user
-activity endpoints require authentication.
+Every endpoint has Request/Response models, Zod schemas, error contract, auth policy, trace/logging contract, and tests.
 
 ## Authentication
+- `POST /auth/session`
+- `DELETE /auth/session`
 
-### `POST /auth/session`
-
-Create/establish an authenticated session.
-
-### `DELETE /auth/session`
-
-Terminate current session where supported.
-
-## Bootstrap / onboarding
-
+## Bootstrap
 ### `GET /bootstrap`
+Returns onboarding data:
+- traditions
+- available devotional focuses
+- practice types: Naam Jap, Meditation
+- meditation presets
+- supported languages
 
-Returns minimum data required to build onboarding: - traditions -
-available focuses - available practice types: Naam Jap, Meditation - meditation presets -
-supported languages
+No Reading/Song practice type.
 
+## Preferences
 ### `PUT /me/preferences`
-
-Updates onboarding/preferences.
-
-Request concept:
-
-``` text
-{
-  traditionId,
-  primaryFocusId?,
-  enabledPractices,
-  naamJapTarget?,
-  meditationTargetMinutes?,
-  reminder?
-}
-```
-
-Response: - normalized saved preferences - today's goal snapshot if
-already initialized
+Supports tradition, optional focus, enabled V1 practices, targets, reminder.
 
 ## Home
-
 ### `GET /home/today`
+Returns greeting/context, today's goals/progress, default mantra, meditation preset.
 
-Returns a purpose-built Today view model: - greeting/context - featured
-reading - current daily goals/progress - default mantra - meditation
-preset - optional song discovery entry
-
-The endpoint is a read composition endpoint. It must not expose raw
-database documents.
+Must not expose Reading, Songs, playback, or favorites data.
 
 ## Naam Jap
+- `GET /mantras`
+- `POST /naam-jap/sessions`
+- `GET /naam-jap/sessions`
 
-### `GET /mantras`
-
-Returns available curated mantras.
-
-### `POST /naam-jap/sessions`
-
-Creates a completed/partial session.
-
-Request:
-
-``` text
-{
-  mantraId?,
-  mantraText?,
-  targetRepetitions,
-  completedRepetitions,
-  startedAt,
-  endedAt?,
-  durationSeconds,
-  completed,
-  clientSessionId
-}
-```
-
-Rules: - `clientSessionId` required for offline-safe idempotency -
-completed repetitions cannot be negative - completed repetitions cannot
-exceed the configured maximum without an explicit product rule - user
-may use a custom mantra only if V1 enables that feature
-
-### `GET /naam-jap/sessions`
-
-Returns current user's session history.
+`clientSessionId` provides offline-safe idempotency.
 
 ## Meditation
+- `GET /meditation/presets`
+- `POST /meditation/sessions`
+- `GET /meditation/sessions`
 
-### `GET /meditation/presets`
+Timer ticks remain client-side.
 
-### `POST /meditation/sessions`
-
-Creates a session record.
-
-### `GET /meditation/sessions`
-
-Returns current user's history.
-
-A timer itself runs on-device. The backend records the result, not every
-timer tick.
-
-## Daily practice
-
-### `GET /goals/today`
-
-Returns today's goal snapshot.
-
-### `GET /progress/today`
-
-Returns today's progress.
-
-### `GET /progress/history`
-
-Returns calendar-oriented history using pagination/month ranges.
-
-### `GET /progress/streak`
-
-Returns: - current streak - longest streak
-
-Streak semantics are defined in `04_DOMAIN_RULES.md`.
+## Progress
+- `GET /goals/today`
+- `GET /progress/today`
+- `GET /progress/history`
+- `GET /progress/streak`
 
 ## Notifications
-
-### `PUT /me/reminder`
-
-Sets reminder preference.
-
-### `POST /devices`
-
-Registers push device token if push notifications are enabled.
-
-### `DELETE /devices/:deviceId`
-
-Removes device registration.
+- `PUT /me/reminder`
+- `POST /devices`
+- `DELETE /devices/:deviceId`
 
 ## Health
+- `GET /health/live`
+- `GET /health/ready`
 
-### `GET /health/live`
+## Removed endpoints
+V1 MUST NOT register:
+- `GET /readings`
+- `GET /readings/:readingId`
+- `PUT /readings/:readingId/progress`
+- `POST /readings/:readingId/complete`
+- `GET /songs`
+- `GET /songs/:songId`
+- `POST /songs/:songId/playback-events`
+- `GET /favorites`
+- `PUT /favorites/:entityType/:entityId`
+- `DELETE /favorites/:entityType/:entityId`
 
-Process is alive.
+Do not recreate them through `/events`, generic content routes, or aliases.
 
-### `GET /health/ready`
-
-Dependencies required for serving traffic are available.
-
-## Explicitly forbidden V1 API patterns
-
-Do not create: - generic `/crud/*` endpoints - `/users/:id/...` for
-current-user activity when token already identifies the user - `/events`
-dumping arbitrary analytics events - song-to-goal endpoints - endpoints
-for UI-only state - endpoints for timer ticks - endpoints that expose
-MongoDB documents directly
-
-
-## 11. Input/output model requirement
-
-Every endpoint MUST have:
-- Request Model
-- Request Zod Schema
-- Response Model
-- Response Zod Schema
-- Error Model
-- authentication/authorization
-- trace/logging requirements
-- tests
-
-See `05A_REQUEST_RESPONSE_MODEL_SPEC.md`.
-
-## 12. API trace requirement
-
-Every request must have a requestId and a structured completion trace containing method, route, status, and duration. Business operations emit meaningful application events where specified.
-
-See `05B_ERROR_LOGGING_TRACE_SPEC.md`.
+## Explicitly forbidden
+Generic CRUD, arbitrary user IDs, direct MongoDB responses, timer tick endpoints, hidden legacy aliases.
