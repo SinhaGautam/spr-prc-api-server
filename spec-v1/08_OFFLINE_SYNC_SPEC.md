@@ -10,8 +10,7 @@ unavailable.
 The mobile app should locally persist: - onboarding/preferences - cached
 published reading content - selected mantra - active Naam Jap
 counter/session - active meditation timer state - unsynced completed
-activity sessions - limited recent song metadata
-
+activity sessions 
 The backend remains authoritative after synchronization.
 
 ## Syncable activity records
@@ -50,7 +49,7 @@ activity.
 
 ## Conflict policy
 
-### Reading progress
+### removed content
 
 Server uses a deterministic rule: - completed wins over incomplete -
 otherwise latest valid progress update wins according to
@@ -80,5 +79,5 @@ server response is canonical.
 ## No offline requirement
 
 The following do not need offline backend access: - content search
-against uncached catalogue - fetching new songs - publishing/admin
+against uncached catalogue - publishing/admin
 operations
