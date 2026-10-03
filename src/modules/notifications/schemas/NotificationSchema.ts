@@ -6,6 +6,7 @@ export const updateReminderSchema = z.object({
 });
 
 export const registerDeviceSchema = z.object({
+  deviceId: z.string().trim().min(1).max(255),
   token: z.string().trim().min(1).max(4096),
   platform: z.enum(["ios", "android"]),
 });
