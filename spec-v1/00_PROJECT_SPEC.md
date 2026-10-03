@@ -24,12 +24,12 @@ assumptions are not authoritative.
 
 ### Daily-practice features
 
-Only these three practices participate in daily goals, daily progress,
-and streaks:
+Only these two practices participate in daily goals, daily progress, and streaks:
 
-1.  Reading
-2.  Naam Jap
-3.  Meditation
+1. Naam Jap
+2. Meditation
+
+Reading and Songs/Bhajans are not part of V1.
 
 ## 3. V1 user journey
 
@@ -49,62 +49,33 @@ limited to choices that materially improve the first Home experience.
 
 ## 4. V1 feature decisions
 
-  -----------------------------------------------------------------------
-  Capability                          V1 decision
-  ----------------------------------- -----------------------------------
-  Home / Today                        Required
+| Capability | V1 decision |
+|---|---|
+| Home / Today | Required |
+| Naam Jap | Required |
+| Meditation | Required |
+| Daily goals | Required for Naam Jap + Meditation only |
+| Progress/history | Required |
+| Streak | Required, simple |
+| Reading | Removed from V1 |
+| Songs/Bhajans | Removed from V1 |
+| Playback history | Removed |
+| Favorites | Removed |
+| Guided meditation | Excluded unless a verified content set is ready |
+| Meditation timer | Required |
+| Meditation bell | Required |
+| Meditation background audio | Optional, maximum 1–2 curated assets |
+| Social/community | Excluded |
+| Chat/AI guru | Excluded |
+| Leaderboards/XP/badges | Excluded |
+| Creator uploads | Excluded |
+| User-generated spiritual content | Excluded |
+| Payments/subscriptions | Excluded unless separately approved |
+| Kafka | Excluded |
+| Redis | Excluded |
+| Microservices | Excluded |
 
-  Reading                             Required
-
-  Naam Jap                            Required
-
-  Meditation                          Required
-
-  Daily goals                         Required for the 3 practices only
-
-  Progress/history                    Required
-
-  Streak                              Required, simple
-
-  Songs/Bhajans                       Excluded
-
-  Song daily goal                     Explicitly excluded
-
-  Favorites                           Excluded
-
-  Playback history                    Excluded
-
-  Guided meditation                   Excluded from V1 unless a verified
-                                      content set is ready
-
-  Meditation timer                    Required
-
-  Meditation bell                     Required
-
-  Meditation background audio         Optional, maximum 1--2 curated
-                                      assets
-
-  Social/community                    Excluded
-
-  Chat/AI guru                        Excluded
-
-  Leaderboards/XP/badges              Excluded
-
-  Creator uploads                     Excluded
-
-  User-generated spiritual content    Excluded
-
-  Payments/subscriptions              Excluded from initial V1 unless
-                                      business approval requires them
-
-  Kafka                               Excluded
-
-  Redis                               Excluded
-
-  Microservices                       Excluded
-  -----------------------------------------------------------------------
-
-## 5. Reading definition
+## 5. Naam Jap definition
 
 V1 Reading is **short, curated spiritual reading**, not an attempt to
 digitize every scripture.
@@ -157,58 +128,31 @@ analytics/history; they do not automatically count as completed.
 
 ## 8. Spiritual taxonomy
 
-Do not model a flat list of every deity as the primary taxonomy.
-
-Use four separate concepts:
-
 ### Tradition
-
-Examples: - Hindu - Jain
+Examples: Hindu, Jain.
 
 ### Devotional focus
-
-Examples: - Rama - Krishna - Shiva - Hanuman - Ganesha - Durga -
-Mahavira
-
-A focus is optional and is a **personalisation preference**, not a
-required classification on every content item.
+Optional personalisation preference such as Rama, Krishna, Shiva, Hanuman, Ganesha, Durga, Mahavira.
 
 ### Practice
-
-Examples: - reading - naam_jap - meditation - song
+Only:
+- naam_jap
+- meditation
 
 ### Content tags
-
-Examples: - peace - devotion - courage - compassion - gratitude -
-remembrance - morning - evening - festival
-
-Content may have zero or more tags.
-
-This prevents the database and UI from becoming a deity/category matrix.
+Examples: peace, devotion, courage, compassion, gratitude, remembrance, morning, evening, festival.
 
 ## 9. Daily-goal semantics
 
 A user's enabled practices define the daily goal set.
 
-Example:
+Each practice has one target:
+- Naam Jap: repetition target
+- Meditation: minute target
 
-``` text
-Reading       enabled
-Naam Jap      enabled
-Meditation    enabled
-Songs         never part of daily goals
-```
+A day is complete when all enabled practices reach their completion criteria.
 
-Each practice has one target: - Reading: completion of the selected
-daily reading - Naam Jap: repetition target - Meditation: minute target
-
-A day is considered complete when **all enabled daily practices reach
-their completion criteria**.
-
-The user can disable a practice. Disabled practices are not treated as
-missed.
-
-Changing a goal today must not rewrite historical days.
+Disabled practices are not treated as missed. Changing a goal today must not rewrite historical days.
 
 ## 10A. Engineering foundation
 
@@ -306,28 +250,23 @@ Do not introduce Kafka merely to implement background work.
 
 ## 12. Backend modules
 
-1.  `auth`
-2.  `users`
-3.  `preferences`
-4.  `content`
-5.  `reading`
-6.  `naam-jap`
-7.  `meditation`
-8.  `daily-practice`
-9.  `progress`
-10. `songs`
-11. `favorites`
-12. `notifications`
-13. `admin-content` (internal/admin API or separate tool boundary)
-14. `health`
-
-Detailed contracts are in the linked specification files.
+1. auth
+2. users
+3. preferences
+4. content
+5. naam-jap
+6. meditation
+7. daily-practice
+8. progress
+9. notifications
+10. admin-content
+11. health
 
 ## 13. Data ownership
 
 Each module owns its domain rules.
 
-Examples: - `reading` owns reading completion semantics - `naam-jap`
+Examples: - `naam-jap` owns session/count validation -
 owns session/count validation - `meditation` owns session completion
 semantics - `daily-practice` owns the daily aggregation model - `songs`
 owns song discovery metadata and playback history - `preferences` owns
@@ -353,14 +292,14 @@ without an explicitly specified application-level contract.
 
 ## 15. Offline-first expectations
 
-The app should remain calm when connectivity is unavailable.
+At minimum:
+- Naam Jap counting can continue locally
+- meditation timer runs locally
+- completed Naam Jap/Meditation sessions are queued for synchronization
+- sync retries safely
+- duplicate session submission must not create duplicate progress
 
-At minimum: - cached current reading can be opened - Naam Jap counting
-can continue locally - meditation timer runs locally - completed
-sessions are queued locally for synchronization - sync retries safely -
-duplicate session submission must not create duplicate progress
-
-The backend remains the authoritative source after synchronization.
+The backend remains authoritative after synchronization.
 
 ## 16. Security and privacy baseline
 
