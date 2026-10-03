@@ -1,310 +1,133 @@
-# V1 Code Structure & Application Architecture Standard
-
-## 1. Purpose
+# V1 Code Structure Standard
 
-This document is the canonical implementation standard for the V1 TypeScript backend.
-
-The codebase uses a modular layered architecture:
-
-```
-HTTP
-  ↓
-src/routes/index.ts
-  ↓
-module/routes.ts
-  ↓
-Controller
-  ↓
-Application Service
-  ↓
-Repository Port
-  ↓
-Infrastructure Adapter
-  ↓
-MongoDB
-```
+This is the implementation standard for the complete V1 backend.
 
-The architecture is based on established service-layer, repository and dependency-injection patterns: controllers handle transport concerns, application services coordinate use cases, and repositories isolate persistence concerns. citeturn2search0turn2search5
+## Runtime architecture
 
-## 2. Common route registry
+HTTP request -> app.ts -> centralized middleware -> routes/index.ts -> module/routes.ts -> Controller -> Application Service -> Repository Port -> Infrastructure Adapter -> MongoDB/provider
 
-`src/routes/index.ts` is the only application-wide route registry.
+Dependency direction: presentation -> application -> domain/entity + ports -> infrastructure.
 
-Responsibilities:
-- API version mounting
-- module router mounting
-- common middleware composition where appropriate
+Controllers never access MongoDB. Application services never import Express Request/Response. Infrastructure never decides HTTP status codes.
 
-It must not:
-- validate request bodies
-- call services
-- access repositories
-- construct response models
-- contain business rules
+## Complete source tree
 
-Express routers are deliberately used as modular, mountable routing units. citeturn3search0
-
-## 3. Module routes
+src/
+  core/application/BaseApiService.ts
+  core/application/Service.ts
+  core/config/Environment.ts
+  core/http/BaseController.ts
+  core/logging/Logger.ts
+  core/persistence/Repository.ts
+  core/security/AuthorizationPolicy.ts
+  core/validation/Schema.ts
+  infrastructure/mongodb/MongoDatabase.ts
+  infrastructure/mongodb/MongoIndexes.ts
+  middleware/AsyncHandler.ts
+  middleware/RequestValidation.ts
+  middleware/auth.ts
+  middleware/rate-limit.ts
+  middleware/request-id.ts
+  middleware/security.ts
+  modules/{auth,users,preferences,content,naam-jap,meditation,daily-practice,progress,notifications,admin-content,bootstrap,home,health}/
+  routes/index.ts
+  shared/domain/types.ts
+  types/express.d.ts
 
-Each HTTP module owns a `routes.ts`.
-
-`routes.ts` contains only:
-- HTTP method/path
-- middleware
-- controller handler binding
-
-Example:
-
-```ts
-router.get("/", requireAuthentication, controller.getProfile.bind(controller));
-router.put("/", requireAuthentication, controller.updateProfile.bind(controller));
-```
-
-No application logic belongs in `routes.ts`.
-
-## 4. Controllers
-
-Controller naming:
+Business entities are module-owned. Shared contains only genuinely cross-module primitives.
 
-```text
-UserController.ts
-MeditationController.ts
-NaamJapController.ts
-```
-
-Controllers:
-- receive Express `Request`
-- validate/parse HTTP input
-- obtain authenticated identity
-- call application services
-- map service results to response DTOs
-- select HTTP status
-- return the HTTP response
-
-Controllers must not:
-- query MongoDB
-- contain business rules
-- instantiate repositories
-- perform persistence mapping
-- implement workflows
-
-Constructor dependency injection is required so controllers remain testable and dependencies are explicit. Constructor injection is a common enterprise DI pattern. citeturn0search1turn0search17
-
-## 5. Application services
-
-Application service naming:
-
-```text
-UserService.ts
-MeditationService.ts
-NaamJapService.ts
-DailyPracticeService.ts
-```
-
-Application services:
-- implement application use cases
-- coordinate repositories and domain objects
-- enforce application-level policies
-- handle idempotency/workflow rules
-- map domain failures to application errors
+## Standard feature module
 
-Services must not receive Express `Request` or `Response`.
+application/<UseCase>Service.ts
+application/<Module>Repository.ts
+controllers/<Module>Controller.ts
+contracts/<Module>Request.ts
+contracts/<Module>Response.ts
+entities/<Module>Entity.ts
+infrastructure/InMemory<Module>Repository.ts
+infrastructure/Mongo<Module>Repository.ts
+schemas/<Module>Schema.ts
+routes.ts
+index.ts
 
-A service may expose multiple meaningful use-case methods. It does not have to implement CRUD.
+Use only the folders a module actually needs.
 
-The service layer exists to define application operations and coordinate the application's response; it should not become a dumping ground for every domain rule. citeturn2search0turn2search6
+## Naming
 
-## 6. BaseApiService
-
-`src/core/application/BaseApiService.ts` is a small cross-cutting base class.
+Use PascalCase TypeScript filenames: UserController.ts, UserService.ts, UserRepository.ts, UserEntity.ts, UserRequest.ts, UserResponse.ts, UserSchema.ts, BaseApiService.ts, BaseController.ts, MongoUserRepository.ts.
 
-It provides:
-- consistent application-operation logging
-- operation duration measurement
-- error logging with context
-- error propagation
+Do not introduce *.controller.ts, *.service.ts, *.repository.ts, *.model.ts, helper.ts, response.ts, or monolithic repositories.ts files.
 
-It must not:
-- know Express
-- create HTTP responses
-- know MongoDB
-- contain business rules
-- convert every service into CRUD
+## Controller
 
-Example:
+A controller validates external input, obtains the authenticated principal, calls an application service, and maps the result to HTTP.
 
-```ts
-export class UserService extends BaseApiService {
-  async getProfile(userId: string): Promise<UserProfileResponse> {
-    return this.execute(
-      "users.getProfile",
-      async () => {
-        const user = await this.userRepository.findById(userId);
+It must not query MongoDB, contain business rules, instantiate repositories, read process.env, or catch an error only to log and rethrow it.
 
-        if (!user) {
-          throw new NotFoundError("User profile not found", { userId });
-        }
+## Application service
 
-        return this.toProfileResponse(user);
-      },
-      { userId },
-    );
-  }
-}
-```
+Services contain application use cases and orchestration. They call repository ports, enforce application rules, map entities to response DTOs, throw typed errors, and use BaseApiService.execute() for operation logging/timing.
 
-## 7. BaseController
+Services are not forced into CRUD. Meaningful methods such as getProfile(), createSession(), listSessions(), and getTodayView() are preferred.
 
-`src/core/http/BaseController.ts` provides only common HTTP response helpers such as:
-- `ok()`
-- `created()`
-- `noContent()`
+## Repository
 
-It must not contain application logic.
+Repository ports belong to the module application layer. Mongo and in-memory implementations belong to module infrastructure.
 
-## 8. Request and response contracts
+Generic capabilities in core/persistence/Repository.ts are composable and must not force every module into CRUD.
 
-HTTP contracts are module-owned:
+## Request/response contracts
 
-```text
-modules/users/
-├── contracts/
-│   ├── UserRequest.ts
-│   └── UserResponse.ts
-└── schemas/
-    └── UserSchema.ts
-```
+Every public endpoint has a request model, request Zod schema, response model, response Zod schema, auth policy, error contract, and tests.
 
-Rules:
-- request contracts describe application input
-- response contracts describe public API output
-- Zod schemas validate external input
-- domain entities are never exposed directly as API responses
-- MongoDB documents are never exposed directly as API responses
+Request models are not persistence models. MongoDB documents are never returned directly.
 
-## 9. Entities
+Success envelopes are not introduced globally unless explicitly approved. Errors use the V1 common error envelope.
 
-Business entities belong to the owning module:
+## Error handling
 
-```text
-modules/users/entities/UserEntity.ts
-modules/meditation/entities/MeditationSessionEntity.ts
-modules/naam-jap/entities/NaamJapSessionEntity.ts
-```
+Use AppError with ValidationError, AuthenticationError, AuthorizationError, NotFoundError, ConflictError, IdempotencyError, and DependencyError.
 
-Use the `Entity` suffix for business entities.
+Unexpected errors map to INTERNAL_SERVER_ERROR. Public errors contain code, message, and requestId unless safe details are explicitly approved.
 
-Shared core/domain code may contain:
-- primitives
-- value types
-- cross-module enums/types
-- domain errors where genuinely shared
+Use try/catch only for translation, recovery, required context, or owned cleanup. Do not swallow errors.
 
-It must not become a shared business-entity dumping ground.
+## Middleware
 
-## 10. Repository ports
+Global middleware owns request ID, structured request logging, security headers, CORS, body limits, authentication extraction, rate limiting, and centralized error handling.
 
-Repository contracts are persistence ports.
+Authentication answers who the principal is. Authorization policies decide whether the principal may perform an operation.
 
-Generic capabilities are intentionally composable:
+## Database
 
-```ts
-Repository<TEntity, TId>
-CreateRepository<TEntity>
-UpdateRepository<TEntity>
-DeleteRepository<TId>
-ReadWriteRepository<TEntity, TId>
-```
+MongoDB lifecycle is owned by infrastructure/mongodb/MongoDatabase.ts. Indexes are owned by MongoIndexes.ts and initialized at startup, never per request.
 
-A module repository extends only the capabilities it actually requires.
+Each module owns its repository adapter. The old monolithic Mongo repository is removed.
 
-Example:
+## Composition
 
-```ts
-export interface UserRepository
-  extends Repository<UserEntity, string>,
-    UpdateRepository<UserEntity> {
-  findById(id: string): Promise<UserEntity | null>;
-}
-```
+modules/<module>/index.ts is the module composition root. It selects adapters, constructs services/controllers, and exports the router and explicitly approved cross-module services.
 
-Non-CRUD use cases must not be forced into `ReadWriteRepository`.
+src/routes/index.ts is only the global route registry.
 
-The repository boundary exists to isolate domain/application code from persistence details. citeturn2search5
+## V1 modules
 
-## 11. Infrastructure
+Active modules: auth, users, preferences, content, naam-jap, meditation, daily-practice, progress, notifications, admin-content, health.
 
-Infrastructure implementations live under the module or database adapter boundary.
+bootstrap and home are application-facing composition modules.
 
-Application code depends on repository ports, never on MongoDB collections.
+Reading, Songs, Favorites, playback, and reading-progress modules are not present.
 
-The composition root wires:
+## Public V1 routes
 
-```text
-Repository implementation
-        ↓
-Application Service
-        ↓
-Controller
-        ↓
-Module Router
-```
+/api/v1 contains only the approved API: /auth/session, /bootstrap, /home/today, /me, /me/preferences, /mantras, /naam-jap/sessions, /meditation/presets, /meditation/sessions, /goals/today, /progress/today, /progress/history, /progress/streak, /me/reminder, /devices, /devices/:deviceId, /health/live, /health/ready.
 
-## 12. Error handling
+No generic public content route is mounted because it is not part of the approved API specification.
 
-Express 5 automatically forwards rejected promises from async route handlers to error middleware, so controllers should not use repetitive catch-and-rethrow blocks merely to forward errors. citeturn1search0turn1search1
+## Reference module
 
-Use `try/catch` only when:
-- translating an infrastructure error
-- recovering from an expected failure
-- adding meaningful context before rethrowing
-- performing a documented fallback
+Users is the reference implementation for the controller/service/repository pattern. Other modules follow the same dependency boundaries while retaining their own domain contracts.
 
-Use `finally` only when the code owns a resource that requires cleanup.
+## Forbidden patterns
 
-## 13. Naming convention
-
-Use PascalCase filenames for classes and contracts:
-
-```text
-UserController.ts
-UserService.ts
-UserEntity.ts
-UserRepository.ts
-UserRequest.ts
-UserResponse.ts
-UserSchema.ts
-BaseApiService.ts
-BaseController.ts
-Repository.ts
-Service.ts
-```
-
-Do not use:
-- `*.controller.ts`
-- `*.service.ts`
-- `*.model.ts`
-- `*.repository.ts`
-- generic `helper.ts` files for unrelated functionality
-
-The filename must communicate the role of the artifact.
-
-## 14. Reference module
-
-The `users` module contains the canonical V1 reference implementation for this architecture.
-
-New modules must follow the same boundaries before introducing module-specific variations.
-
-## 15. Explicit anti-patterns
-
-Do not introduce:
-- controllers containing database calls
-- services receiving Express request/response objects
-- routes containing business logic
-- repositories returning HTTP DTOs
-- MongoDB documents exposed as API responses
-- a generic `BaseCrudService` for every module
-- a generic `BaseCrudController` for every module
-- a giant shared entity file
-- static global repositories
-- hidden dependency construction inside business methods
+Direct MongoDB in controllers/services, route-level service construction, process.env in features, generic CRUD services for non-CRUD use cases, shared business entity bags, public endpoints without contracts, raw Zod issue exposure, swallowed errors, duplicate log-and-rethrow blocks, Reading/Songs aliases, generic event endpoints, and hidden legacy APIs are forbidden.
