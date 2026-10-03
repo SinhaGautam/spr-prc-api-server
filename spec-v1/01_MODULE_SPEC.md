@@ -1,99 +1,43 @@
 # Module Specification — Backend V1
 
 ## Architecture
-Modular monolith: one deployable backend, explicit domain boundaries.
+src/routes/index.ts -> module routes.ts -> module controllers -> application services/use cases -> repository interfaces -> infrastructure implementations.
 
-## Module matrix
-| Module | Owns | Does not own |
-|---|---|---|
-| auth | authentication, identity | daily practice |
-| users | profile/account lifecycle | taxonomy |
-| preferences | tradition/focus/practice/target/reminder preferences | content publication |
-| content | V1 taxonomy + publication metadata | user progress |
-| naam-jap | mantra catalogue + japa sessions | daily aggregation |
-| meditation | presets + meditation sessions + approved meditation media | daily aggregation |
-| daily-practice | daily goal snapshot + aggregation | content authoring |
-| progress | history/streak read models | raw activity rules |
-| notifications | reminder/device delivery | practice completion |
-| admin-content | V1-supported content authoring/publishing | user-owned activity |
-| health | liveness/readiness | business logic |
+## Module ownership
+auth: authentication and identity
+users: profile/account lifecycle
+preferences: user preferences
+content: V1 taxonomy and publication metadata
+naam-jap: mantra catalogue and japa sessions
+meditation: presets, sessions and approved media
+daily-practice: daily goal snapshots and aggregation
+progress: history and streak read models
+notifications: reminder/device delivery
+admin-content: approved V1 content administration when implemented
+health: liveness/readiness
 
-## Removed modules
-V1 `reading` and `songs` modules are removed entirely in V1. Do not replace them with hidden aliases such as `library`, `bhajans`, `listening`, or generic playback modules.
+Reading and Songs/Bhajans are removed from V1.
 
-## Dependencies
-```text
-Controllers
-  ↓
-Application use cases/services
-  ↓
-Domain services/policies
-  ↓
-Repository interfaces
-  ↓
-Infrastructure
-  ↓
-MongoDB/providers
-```
+## Standard API module structure
+modules/<module>/
+- entities/
+- controllers/
+- application/
+- infrastructure/
+- requests/
+- responses/
+- schemas/
+- routes.ts
+- index.ts
 
-Practice completion flows into `daily-practice` application logic; practice modules do not mutate arbitrary progress fields.
+Unused folders may be omitted, but an API module must have routes.ts and controllers/.
 
-## Module responsibilities
+## Entity rule
+Every business entity belongs to its owning module's entities directory. No shared business-entity registry.
 
-### preferences
-- tradition
-- optional primary focus
-- enabled practices: `naam_jap`, `meditation`
-- target values
-- reminder and language
-
-### content
-- V1-supported publication state
-- tradition/focus/tag references
-- provenance where required
-
-### naam-jap
-- list curated mantras
-- create sessions
-- validate count/duration
-- idempotency
-
-### meditation
-- expose timer presets
-- create sessions
-- validate duration/completion
-- expose configured ambient assets where enabled
-
-### daily-practice
-- date-specific goals
-- consume activity completion results
-- calculate day completion
-- preserve historical snapshots
-
-### progress
-- today/history
-- current/longest streak
-- only Naam Jap + Meditation contribute
-
-### admin-content
-- manage V1-supported content only
-- publish/archive
-- provenance verification
-- audit trail
-
-## API-facing folder contract
-```text
-module/
-├── domain/
-├── application/
-├── infrastructure/
-├── presentation/
-│   ├── controllers/
-│   ├── routes/
-│   ├── requests/
-│   ├── responses/
-│   └── schemas/
-└── index.ts
-```
-
-Request/response models and Zod schemas are module-owned.
+## Dependency rules
+Controllers depend on application services.
+Application services depend on repository interfaces and domain policies.
+Infrastructure implements repository interfaces.
+Entities do not depend on Express or MongoDB.
+A module must not directly manipulate another module's persistence.
