@@ -9,6 +9,13 @@ const environmentSchema = z.object({
   MONGODB_URI: z.string().trim().optional(),
   MONGODB_DATABASE: z.string().trim().optional(),
   AUTH_REQUIRED: z.coerce.boolean().default(false),
+}).superRefine((value, ctx) => {
+  if (value.NODE_ENV === "production" && !value.MONGODB_URI) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["MONGODB_URI"], message: "MONGODB_URI is required in production" });
+  }
+  if (value.CORS_ORIGINS.trim().length === 0) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["CORS_ORIGINS"], message: "CORS_ORIGINS must contain at least one origin" });
+  }
 });
 
 export type Environment = z.infer<typeof environmentSchema>;
