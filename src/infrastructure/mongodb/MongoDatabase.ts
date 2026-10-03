@@ -1,6 +1,7 @@
 import { MongoClient, type Db } from "mongodb";
 import { config } from "../../core/config/Environment";
 import { logger } from "../../core/logging/Logger";
+import { ensureDatabaseIndexes } from "./MongoIndexes";
 
 let client: MongoClient | null = null;
 let database: Db | null = null;
@@ -10,7 +11,6 @@ export async function connectDatabase(): Promise<void> {
     logger.warn("MongoDB is not configured; running without database connectivity");
     return;
   }
-
   if (client && database) return;
 
   client = new MongoClient(config.mongodbUri, {
@@ -21,6 +21,7 @@ export async function connectDatabase(): Promise<void> {
 
   await client.connect();
   database = client.db(config.mongodbDatabase);
+  await ensureDatabaseIndexes(database);
   logger.info({ database: config.mongodbDatabase }, "MongoDB connection established");
 }
 
