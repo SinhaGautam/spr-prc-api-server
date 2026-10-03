@@ -3,7 +3,6 @@
 ## Rule 1 --- Daily practice has exactly three tracked practice types
 
 ``` text
-reading
 naam_jap
 meditation
 ```
