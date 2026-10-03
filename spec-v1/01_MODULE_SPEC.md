@@ -1,99 +1,69 @@
 # Module Specification — Backend V1
 
 ## Architecture
-Modular monolith: one deployable backend, explicit domain boundaries.
+
+Modular monolith with explicit domain boundaries.
+
+HTTP -> Controller -> Application Service -> Repository Port -> Infrastructure Adapter -> MongoDB/provider.
 
 ## Module matrix
+
 | Module | Owns | Does not own |
 |---|---|---|
-| auth | authentication, identity | daily practice |
+| auth | authentication, session identity | daily practice |
 | users | profile/account lifecycle | taxonomy |
 | preferences | tradition/focus/practice/target/reminder preferences | content publication |
 | content | V1 taxonomy + publication metadata | user progress |
 | naam-jap | mantra catalogue + japa sessions | daily aggregation |
-| meditation | presets + meditation sessions + approved meditation media | daily aggregation |
+| meditation | presets + meditation sessions + approved media references | daily aggregation |
 | daily-practice | daily goal snapshot + aggregation | content authoring |
 | progress | history/streak read models | raw activity rules |
 | notifications | reminder/device delivery | practice completion |
-| admin-content | V1-supported content authoring/publishing | user-owned activity |
+| admin-content | V1 content authoring/publishing boundary | user-owned activity |
 | health | liveness/readiness | business logic |
+| bootstrap | onboarding composition | user-owned activity |
+| home | Today composition | persistence ownership |
 
-## Removed modules
-V1 `reading` and `songs` modules are removed entirely in V1. Do not replace them with hidden aliases such as `library`, `bhajans`, `listening`, or generic playback modules.
+Reading and Songs/Bhajans are removed completely. Do not replace them with library, bhajans, listening, playback, or generic event aliases.
 
-## Dependencies
-```text
-Controllers
-  ↓
-Application use cases/services
-  ↓
-Domain services/policies
-  ↓
-Repository interfaces
-  ↓
-Infrastructure
-  ↓
-MongoDB/providers
-```
+## Standard module folders
 
-Practice completion flows into `daily-practice` application logic; practice modules do not mutate arbitrary progress fields.
+module/application/<UseCase>Service.ts
+module/application/<Module>Repository.ts
+module/controllers/<Module>Controller.ts
+module/contracts/<Module>Request.ts
+module/contracts/<Module>Response.ts
+module/entities/<Module>Entity.ts
+module/infrastructure/InMemory<Module>Repository.ts
+module/infrastructure/Mongo<Module>Repository.ts
+module/schemas/<Module>Schema.ts
+module/routes.ts
+module/index.ts
 
-## Module responsibilities
+A module may omit a folder when it has no corresponding responsibility.
 
-### preferences
-- tradition
-- optional primary focus
-- enabled practices: `naam_jap`, `meditation`
-- target values
-- reminder and language
+## Dependency rules
 
-### content
-- V1-supported publication state
-- tradition/focus/tag references
-- provenance where required
+- Controllers depend on application services.
+- Application services depend on module repository ports.
+- Infrastructure implements repository ports.
+- Controllers do not import MongoDB.
+- Application services do not import Express request/response types.
+- Business entities are owned by their module.
+- Shared contains only stable cross-module primitives.
+- Route files are composition-only.
+- Module index files are composition roots.
 
-### naam-jap
-- list curated mantras
-- create sessions
-- validate count/duration
-- idempotency
+## Cross-module rules
 
-### meditation
-- expose timer presets
-- create sessions
-- validate duration/completion
-- expose configured ambient assets where enabled
+Practice completion flows into daily-practice application logic.
+Home and bootstrap may compose application services from other modules.
+A module must not directly mutate another module's persistence collection.
 
-### daily-practice
-- date-specific goals
-- consume activity completion results
-- calculate day completion
-- preserve historical snapshots
+## V1 implementation standard
 
-### progress
-- today/history
-- current/longest streak
-- only Naam Jap + Meditation contribute
+Every public endpoint requires a request model, request Zod schema, response model, response Zod schema, authentication policy, authorization rule where applicable, typed error mapping, structured operation logging, request trace ID, and tests.
 
-### admin-content
-- manage V1-supported content only
-- publish/archive
-- provenance verification
-- audit trail
+## V1 public API
 
-## API-facing folder contract
-```text
-module/
-├── domain/
-├── application/
-├── infrastructure/
-├── presentation/
-│   ├── controllers/
-│   ├── routes/
-│   ├── requests/
-│   ├── responses/
-│   └── schemas/
-└── index.ts
-```
-
-Request/response models and Zod schemas are module-owned.
+Only endpoints in 03_API_SPEC.md are public. The content module is an internal taxonomy boundary and its generic catalog route is not mounted by the V1 global route registry.
