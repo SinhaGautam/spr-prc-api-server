@@ -1,121 +1,47 @@
-# Test Specification --- Backend V1
+# Test Specification — Backend V1
 
-## Testing philosophy
+## Goal
+Tests prove the V1 contract and prove removed V1 features have not leaked back into V1.
 
-Tests are part of the specification, not a final cleanup step.
+## Daily goals
+Test Naam Jap only, Meditation only, both, none, immutable history, future preference changes, and rejection of Reading/Song practice values.
 
-Every business rule must have executable coverage.
+## Daily progress
+Test first activity, accumulation, idempotency, exact day completion, and absence of Reading/Song contribution paths.
 
-## Test layers
+## Streak
+Test first completed day, consecutive days, missed day, current incomplete day, timezone boundaries/changes, and duplicate submissions.
 
-1.  Unit tests
-2.  Repository/infrastructure integration tests
-3.  API integration tests
-4.  Contract tests
-5.  Security/authorization tests
-6.  End-to-end acceptance tests for critical journeys
+## Naam Jap
+Test negative count rejection, valid count, target reached/exceeded, duplicate clientSessionId, malformed dates, invalid duration, offline retry, mantra snapshot.
 
-## Critical unit tests
+## Meditation
+Test supported/unsupported presets, completed/interrupted sessions, duplicate clientSessionId, actual duration aggregation, offline retry.
 
-### Daily goals
+## Removal guard tests
+- no V1 route starts with `/readings` or `/songs`
+- bootstrap practice enum excludes Reading/Song
+- preferences schema rejects Reading/Song
+- daily goal/progress models have no Reading/Song fields
+- repository exports contain no Reading/Song repositories
+- seed data contains no reading/song/playback/favorite records
+- no legacy feature module is imported by V1
 
-Must test: - enabled Reading only - enabled Naam Jap only - enabled
-Meditation only - all three enabled - all disabled - historical goal
-snapshot remains unchanged - changing today's/future preferences
-according to approved rule
+## API integration
+Every V1 endpoint: success, validation failure, auth failure, authorization failure where relevant, not found, duplicate/idempotency, dependency failure where meaningful. Also assert removed paths are not registered.
 
-### Daily progress
+## DB integration
+Verify indexes, pagination, UTC/local-date behavior, atomicity, idempotency, and legacy data isolation.
 
-Must test: - first activity creates progress - repeated completion is
-idempotent - Naam Jap accumulates repetitions - meditation accumulates
-qualifying minutes - reading completion is boolean/intentional - day
-becomes complete exactly when all enabled practices qualify - songs
-never affect progress
+## Acceptance
+### First day
+Create account → choose tradition/focus → enable Naam Jap + Meditation → set targets → Today → complete Naam Jap → complete Meditation → Today shows 2/2 → streak qualifies.
 
-### Streak
+### Offline
+Lose network → perform Naam Jap locally → reconnect → sync once → progress updates once.
 
-Must test: - first completed day - consecutive completed days - missed
-day - current incomplete day - timezone boundary - timezone change -
-multiple activities on same day - duplicate activity submission -
-historical day correction policy
+### Removal
+Legacy Reading/Song routes unavailable; invalid practice values rejected; bootstrap has only V1 practices; progress has only V1 practice branches.
 
-### Naam Jap
-
-Must test: - zero count rejected where invalid - valid count accepted -
-target reached - target exceeded - duplicate clientSessionId - malformed
-dates - invalid duration - offline retry
-
-### Meditation
-
-Must test: - supported preset - unsupported duration - completed
-session - interrupted session - duplicate clientSessionId - actual
-duration aggregation - offline retry
-
-## API integration tests
-
-Every V1 endpoint must cover: - success - validation failure -
-authentication failure - authorization failure where applicable - not
-found - duplicate/idempotency case - dependency failure where meaningful
-
-## Database integration tests
-
-Use an isolated test MongoDB environment.
-
-Verify: - unique indexes - query filters - pagination - date/time
-behaviour - update atomicity - duplicate protection
-
-## Contract tests
-
-Mobile-facing response schemas must be validated so backend changes
-cannot silently break the Expo client.
-
-## Acceptance scenarios
-
-### Scenario A --- First day
-
-``` text
-Create account
-→ choose Hindu
-→ choose Ram as optional focus
-→ enable Naam Jap + Meditation
-→ set targets
-→ arrive at Today
-→ complete 108 Naam Jap
-→ complete Meditation
-→ Today shows 2/2
-→ day qualifies for streak
-```
-
-
-### Scenario C --- Offline Naam Jap
-
-``` text
-Lose network
-→ count 108
-→ finish session
-→ reconnect
-→ session syncs once
-→ daily progress updates once
-```
-
-### Scenario D --- Content governance
-
-``` text
-Draft reading
-→ not visible publicly
-
-Publish reading
-→ visible
-
-Archive reading
-→ no longer discoverable
-
-Historical completion
-→ remains valid
-```
-
-## Coverage requirement
-
-Target: - high coverage of domain/application rules - 100% coverage of
-critical completion/streak/idempotency rules - do not chase line
-coverage at the expense of behavioural coverage
+## Coverage
+100% of critical completion/streak/idempotency/removal-isolation rules.
