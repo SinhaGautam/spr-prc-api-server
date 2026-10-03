@@ -21,9 +21,7 @@ A service does not have to be CRUD.
 
 ## Repositories
 Use capability-based generic contracts:
-- IRepository<TEntity, TId>
-- IMutableRepository<TEntity, TId>
-- IReadRepository<TEntity, TId>
+- IRepository<TEntity, TId>, ICreateRepository<TEntity>, IMutableRepository<TEntity, TId>, and IReadRepository<TEntity, TId>
 
 Module repositories extend the smallest suitable contract and add module-specific methods.
 
