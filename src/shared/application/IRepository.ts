@@ -7,5 +7,4 @@ export interface IRepository<TEntity, TId = string> {
 
 export interface IReadRepository<TEntity, TId = string> {
   findById(id: TId): Promise<TEntity | null>;
-  findAll(): Promise<TEntity[]>;
 }
