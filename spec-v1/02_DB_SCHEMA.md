@@ -42,7 +42,7 @@ email login is supported - `(status, createdAt)`
   userId,
   traditionId,
   primaryFocusId?,
-  enabledPractices: ["reading", "naam_jap", "meditation"],
+  enabledPractices: ["naam_jap", "meditation"],
   readingTarget: { type: "daily_item" },
   naamJapTarget: { repetitions: 108 },
   meditationTarget: { minutes: 5 },
@@ -270,11 +270,6 @@ Indexes: - `(userId, startedAt desc)`
   userId,
   localDate,
   timezone,
-  reading: {
-    enabled,
-    targetType,
-    targetValue
-  },
   naamJap: {
     enabled,
     targetRepetitions
@@ -301,11 +296,6 @@ preferences.
   userId,
   localDate,
   timezone,
-
-  reading: {
-    completed,
-    completedCount
-  },
 
   naamJap: {
     completed,
