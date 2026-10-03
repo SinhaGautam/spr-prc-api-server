@@ -1,23 +1,23 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import type { DailyPracticeService } from "../daily-practice/application/DailyPracticeService";
+import type { MeditationService } from "../meditation/application/MeditationService";
 
-export class HomeService {
-  async getTodayView() {
-    try {
-      const payload = {
+export class HomeService extends BaseApiService {
+  constructor(
+    private readonly dailyPracticeService: DailyPracticeService,
+    private readonly meditationService: MeditationService,
+  ) { super(); }
+
+  async getTodayView(_userId: string) {
+    return this.execute("home.getTodayView", async () => {
+      const goals = await this.dailyPracticeService.getGoalsToday(_userId);
+      const presets = await this.meditationService.listPresets();
+      return {
         greeting: "May your practice be gentle and steady.",
-        dailyGoals: [
-          { practice: "naam_jap", targetLabel: "108 repetitions", progress: 32, complete: false },
-          { practice: "meditation", targetLabel: "15 minutes", progress: 15, complete: true },
-        ],
-        defaultMantra: { id: "mantra-hari", name: "Hari Naam", text: "Hare Krishna" },
-        meditationPreset: { id: "preset-15", durationMinutes: 15 },
+        dailyGoals: goals.goals,
+        defaultMantra: { id: "mantra-1", name: "Hari Naam", text: "Hare Krishna" },
+        meditationPreset: presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? { id: "preset-15", durationMinutes: 15 },
       };
-
-      logger.debug("Resolved home today view");
-      return payload;
-    } catch (error) {
-      logger.error({ err: error }, "Failed to resolve home today view");
-      throw error;
-    }
+    }, { userId: _userId });
   }
 }
