@@ -10,5 +10,5 @@ const userRepository = database ? new MongoUserRepository(database) : new InMemo
 const userService = new UserService(userRepository);
 const userController = new UserController(userService);
 
-export { userService };
+export { userRepository, userService };
 export default createUserRoutes(userController);
