@@ -1,18 +1,10 @@
 import { Router, type IRouter } from "express";
-import { logger } from "../../lib/logger";
 import { ContentService } from "./application/ContentService";
+import { ContentController } from "./controllers/ContentController";
 
 const router: IRouter = Router();
-const service = new ContentService();
+const controller = new ContentController(new ContentService());
 
-router.get("/", async (_req, res) => {
-  try {
-    const payload = await service.listPublished();
-    res.json({ ...payload, total: payload.items.length });
-  } catch (error) {
-    logger.error({ err: error, endpoint: "content" }, "Controller error while loading content catalog");
-    throw error;
-  }
-});
+router.get("/", controller.list);
 
 export default router;
