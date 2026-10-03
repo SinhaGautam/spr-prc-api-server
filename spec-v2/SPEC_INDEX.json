@@ -1,0 +1,18 @@
+{
+  "project": "Bhakti App Backend",
+  "version": "V2",
+  "baseline": "spec-v1",
+  "method": "Specification-Driven Development",
+  "scopeChange": {
+    "removedFeatures": ["reading", "songs", "playback_history", "generic_favorites"],
+    "remainingTrackedPractices": ["naam_jap", "meditation"]
+  },
+  "specs": [
+    "00_PROJECT_SPEC.md","01A_ENGINEERING_FOUNDATION_SPEC.md","01_MODULE_SPEC.md","02_DB_SCHEMA.md",
+    "03_API_SPEC.md","04_DOMAIN_RULES.md","05A_REQUEST_RESPONSE_MODEL_SPEC.md","05B_ERROR_LOGGING_TRACE_SPEC.md",
+    "05_CLASS_FUNCTION_SPEC.md","06_TEST_SPEC.md","07_CONTENT_SPEC.md","08_OFFLINE_SYNC_SPEC.md",
+    "09_SECURITY_PRIVACY_SPEC.md","10_IMPLEMENTATION_PLAN.md","11_ADR.md"
+  ],
+  "implementationRule": "No V2 endpoint, collection, class, function, or background job is implemented without a traceable V2 requirement, module-owned request/response models, Zod schemas, error contract, logging/trace contract, and tests.",
+  "historicalBaseline": "spec-v1 remains unchanged"
+}
