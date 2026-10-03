@@ -1,434 +1,113 @@
-# MongoDB Schema Specification --- V1
+# MongoDB Schema Specification — Backend V1
 
 ## General rules
+- MongoDB is system of record.
+- Dates are BSON Date/UTC.
+- User-local daily boundaries use IANA timezone.
+- API models are never MongoDB documents.
+- Large media binaries are never stored in MongoDB.
 
--   MongoDB is the system of record.
--   Every document has `_id`, `createdAt`, `updatedAt` unless explicitly
-    excluded.
--   Dates stored as BSON Date/UTC.
--   User-local day boundaries are resolved using the user's IANA
-    timezone.
--   References use stable MongoDB ObjectId values unless an explicit
-    public ID is required.
--   Never store large audio binaries in MongoDB.
-
-## Collections
+## Active V1 collections
 
 ### `users`
-
-``` text
-{
-  _id,
-  authProvider,
-  authSubject,
-  displayName?,
-  email?,
-  timezone,
-  language,
-  status,
-  createdAt,
-  updatedAt
-}
-```
-
-Indexes: - unique `(authProvider, authSubject)` - unique `email` only if
-email login is supported - `(status, createdAt)`
+Retained from V1 with existing identity/profile fields and indexes.
 
 ### `user_preferences`
-
-``` text
+```text
 {
   _id,
   userId,
   traditionId,
   primaryFocusId?,
   enabledPractices: ["naam_jap", "meditation"],
-  readingTarget: { type: "daily_item" },
   naamJapTarget: { repetitions: 108 },
   meditationTarget: { minutes: 5 },
-  reminder: {
-    enabled: false,
-    localTime: "07:00"
-  },
+  reminder: { enabled: false, localTime: "07:00" },
   language,
   createdAt,
   updatedAt
 }
 ```
+Unique: `(userId)`.
 
-Unique index: - `(userId)`
-
-Rule: - one active preference document per user.
+V1 MUST reject any Reading/Song practice value.
 
 ### `traditions`
-
-``` text
-{
-  _id,
-  key,
-  name,
-  status,
-  sortOrder,
-  createdAt,
-  updatedAt
-}
-```
-
-V1 seed examples: - hindu - jain
-
-Do not encode every deity as a tradition.
+Retained from V1.
 
 ### `focuses`
-
-``` text
-{
-  _id,
-  key,
-  name,
-  traditionIds: [ObjectId],
-  aliases?,
-  status,
-  sortOrder,
-  createdAt,
-  updatedAt
-}
-```
-
-A focus can be associated with one or more traditions where appropriate.
+Retained from V1.
 
 ### `tags`
-
-``` text
-{
-  _id,
-  key,
-  name,
-  type,
-  status,
-  createdAt,
-  updatedAt
-}
-```
-
-Tag types may include: - theme - time - intent - festival
-
-### `readings`
-
-``` text
-{
-  _id,
-  title,
-  subtitle?,
-  contentType,
-  traditionIds: [ObjectId],
-  focusIds: [ObjectId],
-  tagIds: [ObjectId],
-  language,
-  body,
-  estimatedMinutes,
-  source: {
-    kind,
-    title?,
-    author?,
-    publication?,
-    reference?,
-    rightsNote?
-  },
-  status,
-  version,
-  publishedAt?,
-  createdAt,
-  updatedAt
-}
-```
-
-V1 content types: - scripture_excerpt - prayer - reflection - story -
-teaching
-
-Required: - `source` for canonical/attributed material -
-rights/provenance decision before publication
-
-Indexes: - `(status, language, publishedAt)` -
-`(status, traditionIds, publishedAt)` -
-`(status, focusIds, publishedAt)` - `(status, tagIds, publishedAt)`
-
-### `reading_progress`
-
-``` text
-{
-  _id,
-  userId,
-  readingId,
-  progressPercent,
-  completed,
-  firstOpenedAt,
-  lastOpenedAt,
-  completedAt?,
-  updatedAt
-}
-```
-
-Unique: - `(userId, readingId)`
-
-Indexes: - `(userId, lastOpenedAt)` - `(userId, completed, updatedAt)`
+Retained only where needed for V1-supported content.
 
 ### `mantras`
-
-``` text
-{
-  _id,
-  name,
-  text,
-  transliteration?,
-  pronunciationNote?,
-  meaning?,
-  traditionIds,
-  focusIds,
-  language,
-  audioAssetId?,
-  status,
-  createdAt,
-  updatedAt
-}
-```
-
-V1 should contain a curated, small library.
+Retain V1 curated mantra model.
 
 ### `naam_jap_sessions`
-
-``` text
-{
-  _id,
-  userId,
-  mantraId?,
-  mantraTextSnapshot?,
-  targetRepetitions,
-  completedRepetitions,
-  startedAt,
-  endedAt?,
-  durationSeconds,
-  completed,
-  clientSessionId,
-  createdAt
-}
-```
-
-Unique: - `(userId, clientSessionId)`
-
-Indexes: - `(userId, startedAt desc)` - `(userId, endedAt desc)`
-
-Important: - store `mantraTextSnapshot` so historical sessions remain
-understandable if content changes.
+Retain V1 session model. Unique: `(userId, clientSessionId)`. Indexes: `(userId, startedAt desc)`, `(userId, endedAt desc)`.
 
 ### `meditation_presets`
-
-``` text
-{
-  _id,
-  key,
-  durationMinutes,
-  startBellAssetId?,
-  endBellAssetId?,
-  ambientAssetId?,
-  status,
-  sortOrder,
-  createdAt,
-  updatedAt
-}
-```
-
-V1 can also seed these from application configuration if the product
-team decides they are not admin-managed.
+Retain V1 preset model.
 
 ### `meditation_sessions`
-
-``` text
-{
-  _id,
-  userId,
-  presetId?,
-  plannedMinutes,
-  actualSeconds,
-  startedAt,
-  endedAt?,
-  completed,
-  completionReason,
-  clientSessionId,
-  createdAt
-}
-```
-
-Unique: - `(userId, clientSessionId)`
-
-Indexes: - `(userId, startedAt desc)`
+Retain V1 session model. Unique: `(userId, clientSessionId)`. Index: `(userId, startedAt desc)`.
 
 ### `daily_goals`
-
-``` text
+V1 removes the Reading branch:
+```text
 {
-  _id,
-  userId,
-  localDate,
-  timezone,
-  naamJap: {
-    enabled,
-    targetRepetitions
-  },
-  meditation: {
-    enabled,
-    targetMinutes
-  },
-  createdAt,
-  updatedAt
+  _id, userId, localDate, timezone,
+  naamJap: { enabled, targetRepetitions },
+  meditation: { enabled, targetMinutes },
+  createdAt, updatedAt
 }
 ```
-
-Unique: - `(userId, localDate)`
-
-Rule: - this is a daily snapshot, not merely a pointer to current
-preferences.
+Unique: `(userId, localDate)`.
 
 ### `daily_progress`
-
-``` text
+V1 removes the Reading branch:
+```text
 {
-  _id,
-  userId,
-  localDate,
-  timezone,
-
-  naamJap: {
-    completed,
-    repetitions
-  },
-
-  meditation: {
-    completed,
-    minutes
-  },
-
+  _id, userId, localDate, timezone,
+  naamJap: { completed, repetitions },
+  meditation: { completed, minutes },
   completedPractices,
   enabledPracticeCount,
   completedPracticeCount,
   dayCompleted,
-
-  createdAt,
-  updatedAt
+  createdAt, updatedAt
 }
 ```
-
-Unique: - `(userId, localDate)`
-
-Indexes: - `(userId, localDate desc)` -
-`(userId, dayCompleted, localDate desc)`
-
-### `songs`
-
-``` text
-{
-  _id,
-  title,
-  artist?,
-  album?,
-  traditionIds,
-  focusIds,
-  tagIds,
-  language,
-  audioAssetId,
-  artworkAssetId?,
-  durationSeconds,
-  status,
-  publishedAt?,
-  createdAt,
-  updatedAt
-}
-```
-
-Indexes: - `(status, publishedAt desc)` -
-`(status, language, publishedAt desc)` -
-`(status, focusIds, publishedAt desc)` -
-`(status, tagIds, publishedAt desc)`
+Unique: `(userId, localDate)`.
+Indexes: `(userId, localDate desc)`, `(userId, dayCompleted, localDate desc)`.
 
 ### `media_assets`
-
-``` text
-{
-  _id,
-  type,
-  storageKey,
-  cdnUrl,
-  mimeType,
-  sizeBytes,
-  durationSeconds?,
-  checksum?,
-  status,
-  createdAt,
-  updatedAt
-}
-```
-
-The API returns CDN metadata/URLs. Backend never proxies streaming
-traffic.
-
-### `favorites`
-
-``` text
-{
-  _id,
-  userId,
-  entityType,
-  entityId,
-  createdAt
-}
-```
-
-Unique: - `(userId, entityType, entityId)`
-
-V1 entity types: - reading - mantra - song
-
-### `playback_history`
-
-``` text
-{
-  _id,
-  userId,
-  songId,
-  eventType,
-  positionSeconds,
-  playedAt,
-  clientEventId
-}
-```
-
-Unique: - `(userId, clientEventId)`
-
-Keep history intentionally limited. Do not record heartbeat events every
-few seconds.
+Retain only for approved mantra/meditation media. No song media.
 
 ### `device_registrations`
+Retain from V1.
 
-``` text
-{
-  _id,
-  userId,
-  platform,
-  pushToken,
-  timezone,
-  enabled,
-  lastSeenAt,
-  createdAt,
-  updatedAt
-}
-```
+## Collections removed from active V1
+- `readings`
+- `reading_progress`
+- `songs`
+- `playback_history`
+- `favorites`
 
-Unique: - `(platform, pushToken)`
+Remove their repositories, indexes, API schemas, application references, and seed records.
+
+## Legacy migration policy
+Do not reinterpret legacy Reading/Song records as V1 activities.
+
+Before production deployment, choose and document one:
+1. archive legacy collections outside the V1 application path, or
+2. retain temporarily but make them unreachable from all V1 repositories/API and schedule deletion under an approved retention policy.
+
+The chosen policy must be verified by migration/retention tests.
 
 ## Referential rules
-
--   deleting a user must remove/anonymize user-owned data according to
-    the account-deletion policy
--   deleting content does not physically remove historical activity
-    snapshots
--   archived content is not returned by public discovery
--   historical session snapshots remain readable
--   songs never write `daily_progress`
+- user deletion covers all active V1 user-owned data
+- archived V1 content is not public
+- historical Naam Jap snapshots retain sufficient immutable data
+- legacy Reading/Song data is not exposed by V1 APIs
