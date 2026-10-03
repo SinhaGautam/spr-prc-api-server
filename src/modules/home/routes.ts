@@ -1,18 +1,10 @@
 import { Router, type IRouter } from "express";
-import { logger } from "../../lib/logger";
 import { HomeService } from "./application/HomeService";
+import { HomeController } from "./controllers/HomeController";
 
 const router: IRouter = Router();
-const service = new HomeService();
+const controller = new HomeController(new HomeService());
 
-router.get("/today", async (_req, res) => {
-  try {
-    const payload = await service.getTodayView();
-    res.json(payload);
-  } catch (error) {
-    logger.error({ err: error, endpoint: "home/today" }, "Controller error while loading home data");
-    throw error;
-  }
-});
+router.get("/today", controller.getToday);
 
 export default router;
