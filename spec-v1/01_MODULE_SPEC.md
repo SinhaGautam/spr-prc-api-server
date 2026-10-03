@@ -1,161 +1,87 @@
-# Module Specification --- Backend V1
+# Module Specification — Backend V1
 
-## Architecture style
-
-Modular monolith. One deployable backend, explicit domain boundaries.
+## Architecture
+Modular monolith: one deployable backend, explicit domain boundaries.
 
 ## Module matrix
+| Module | Owns | Does not own |
+|---|---|---|
+| auth | authentication, identity | daily practice |
+| users | profile/account lifecycle | taxonomy |
+| preferences | tradition/focus/practice/target/reminder preferences | content publication |
+| content | V1 taxonomy + publication metadata | user progress |
+| naam-jap | mantra catalogue + japa sessions | daily aggregation |
+| meditation | presets + meditation sessions + approved meditation media | daily aggregation |
+| daily-practice | daily goal snapshot + aggregation | content authoring |
+| progress | history/streak read models | raw activity rules |
+| notifications | reminder/device delivery | practice completion |
+| admin-content | V1-supported content authoring/publishing | user-owned activity |
+| health | liveness/readiness | business logic |
 
-  --------------------------------------------------------------------------
-  Module                  Owns                       Does not own
-  ----------------------- -------------------------- -----------------------
-  auth                    authentication, identity   daily practice
+## Removed modules
+V1 `reading` and `songs` modules are removed entirely in V1. Do not replace them with hidden aliases such as `library`, `bhajans`, `listening`, or generic playback modules.
 
-  users                   profile                    religious taxonomy
-
-  preferences             tradition/focus/practice   content publication
-                          preferences                
-
-  content                 shared taxonomy +          user progress
-                          publication metadata       
-
-  reading                 reading lifecycle/progress daily aggregation
-                          rules                      
-
-  naam-jap                mantra and japa sessions   daily aggregation
-
-  meditation              meditation                 song playback
-                          presets/sessions           
-
-  daily-practice          daily goal snapshot +      content authoring
-                          aggregation                
-
-  progress                historical                 raw activity rules
-                          summaries/streak read      
-                          models                     
-
-  songs                   song catalogue + playback  daily goals
-                          metadata                   
-
-  favorites               user bookmarks             content ownership
-
-  notifications           reminder                   practice completion
-                          preferences/delivery       
-
-  admin-content           content                    user-owned activity
-                          authoring/publishing       
-
-  health                  liveness/readiness         business logic
-  --------------------------------------------------------------------------
-
-## Dependency direction
-
-``` text
+## Dependencies
+```text
 Controllers
-   ↓
-Application services
-   ↓
-Domain services / policies
-   ↓
-Repositories
-   ↓
-MongoDB
-
-Shared infrastructure may be used by modules.
-Domain modules must not depend on controllers.
+  ↓
+Application use cases/services
+  ↓
+Domain services/policies
+  ↓
+Repository interfaces
+  ↓
+Infrastructure
+  ↓
+MongoDB/providers
 ```
 
-## Module requirements
+Practice completion flows into `daily-practice` application logic; practice modules do not mutate arbitrary progress fields.
 
-### auth
-
--   authenticate supported login method
--   establish authenticated principal
--   revoke/expire sessions according to auth strategy
--   never expose password hashes
-
-### users
-
--   retrieve/update user profile
--   support account lifecycle
--   timezone is required for daily boundaries
+## Module responsibilities
 
 ### preferences
-
--   tradition
--   optional primary devotional focus
--   enabled daily practices: Naam Jap and Meditation
--   daily target values
--   reminder preference
--   language
+- tradition
+- optional primary focus
+- enabled practices: `naam_jap`, `meditation`
+- target values
+- reminder and language
 
 ### content
-
--   content status: draft, published, archived
--   tradition references
--   focus references
--   tags
--   language
--   provenance
+- V1-supported publication state
+- tradition/focus/tag references
+- provenance where required
 
 ### naam-jap
-
--   list available mantra presets
--   record completed sessions
--   validate count and duration
--   support client idempotency
+- list curated mantras
+- create sessions
+- validate count/duration
+- idempotency
 
 ### meditation
-
--   expose V1 timer presets
--   create completed/partial session records
--   validate duration
--   expose available ambient assets if enabled
+- expose timer presets
+- create sessions
+- validate duration/completion
+- expose configured ambient assets where enabled
 
 ### daily-practice
-
--   derive today's goal snapshot
--   update practice progress from activity completion
--   calculate daily completion
--   preserve historical snapshots
+- date-specific goals
+- consume activity completion results
+- calculate day completion
+- preserve historical snapshots
 
 ### progress
+- today/history
+- current/longest streak
+- only Naam Jap + Meditation contribute
 
--   return today
--   return calendar/history
--   calculate current/longest streak using defined rules
--   never infer completion from songs
+### admin-content
+- manage V1-supported content only
+- publish/archive
+- provenance verification
+- audit trail
 
-### notifications
-
--   register device/token if push is used
--   store reminder preference
--   respect local timezone
--   no notification is sent for songs as a goal reminder
-
-## Cross-module rule
-
-A daily-progress update may consume an activity completion result, but
-the activity module must not directly write arbitrary daily-progress
-fields.
-
-Preferred pattern:
-
-``` text
-Practice Service
-   ↓
-ActivityCompleted result
-   ↓
-DailyPractice Application Service
-   ↓
-DailyProgress repository
-```
-
-
-## Module folder contract
-
-Every API-facing module should follow this shape:
-
+## API-facing folder contract
 ```text
 module/
 ├── domain/
@@ -170,12 +96,4 @@ module/
 └── index.ts
 ```
 
-Request/response models and their Zod schemas are module-owned.
-
-Naming:
-- file names: kebab-case
-- classes/types/interfaces: PascalCase
-- functions/constants: camelCase
-- Zod schema constants: camelCase + `Schema`
-
-See `05A_REQUEST_RESPONSE_MODEL_SPEC.md`.
+Request/response models and Zod schemas are module-owned.
