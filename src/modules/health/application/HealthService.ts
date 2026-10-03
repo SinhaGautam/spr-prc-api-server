@@ -1,28 +1,13 @@
-import { logger } from "../../../lib/logger";
+import { getDatabase } from "../../../infrastructure/mongodb/MongoDatabase";
 
 export class HealthService {
-  async getLive() {
-    try {
-      return { status: "ok" };
-    } catch (error) {
-      logger.error({ err: error }, "Failed to report live health");
-      throw error;
-    }
-  }
+  async getLive() { return { status: "ok" as const }; }
 
   async getReady() {
-    try {
-      return {
-        status: "ready",
-        checks: {
-          api: "ok",
-          mongo: "not_configured",
-          objectStorage: "not_configured",
-        },
-      };
-    } catch (error) {
-      logger.error({ err: error }, "Failed to report ready health");
-      throw error;
-    }
+    const mongo = getDatabase();
+    return {
+      status: mongo ? ("ready" as const) : ("degraded" as const),
+      checks: { api: "ok" as const, mongo: mongo ? ("ok" as const) : ("not_configured" as const) },
+    };
   }
 }
