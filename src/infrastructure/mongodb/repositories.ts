@@ -1,15 +1,11 @@
 import type { Db, Collection } from "mongodb";
 import {
   DailyGoalSnapshot,
-  Favorite,
   Focus,
   Mantra,
   MediaAsset,
   MeditationPreset,
   MeditationSession,
-  Reading,
-  ReadingProgress,
-  Song,
   Tag,
   Tradition,
   User,
@@ -18,15 +14,11 @@ import {
 import type {
   DailyGoalRepository,
   DailyProgressRepository,
-  FavoriteRepository,
   FocusRepository,
   MantraRepository,
   MediaAssetRepository,
   MeditationPresetRepository,
   MeditationSessionRepository,
-  ReadingProgressRepository,
-  ReadingRepository,
-  SongRepository,
   TagRepository,
   TraditionRepository,
   UserPreferencesRepository,
@@ -75,48 +67,6 @@ function mapUserPreferences(doc: JsonDoc): UserPreferences {
     typeof doc.naamJapTarget === "object" && doc.naamJapTarget !== null ? (doc.naamJapTarget as { repetitions: number }) : undefined,
     typeof doc.meditationTarget === "object" && doc.meditationTarget !== null ? (doc.meditationTarget as { minutes: number }) : undefined,
     toDate(doc.createdAt),
-    toDate(doc.updatedAt),
-  );
-}
-
-function mapReading(doc: JsonDoc): Reading {
-  return new Reading(
-    String(doc._id ?? ""),
-    String(doc.title ?? ""),
-    typeof doc.subtitle === "string" ? doc.subtitle : null,
-    String(doc.contentType ?? "reflection") as Reading["contentType"],
-    Array.isArray(doc.traditionIds) ? doc.traditionIds.map(String) : [],
-    Array.isArray(doc.focusIds) ? doc.focusIds.map(String) : [],
-    Array.isArray(doc.tagIds) ? doc.tagIds.map(String) : [],
-    String(doc.language ?? "en"),
-    String(doc.body ?? ""),
-    Number(doc.estimatedMinutes ?? 0),
-    {
-      kind: String((doc.source as JsonDoc)?.kind ?? "reflection"),
-      title: typeof (doc.source as JsonDoc)?.title === "string" ? String((doc.source as JsonDoc)?.title) : undefined,
-      author: typeof (doc.source as JsonDoc)?.author === "string" ? String((doc.source as JsonDoc)?.author) : undefined,
-      publication: typeof (doc.source as JsonDoc)?.publication === "string" ? String((doc.source as JsonDoc)?.publication) : undefined,
-      reference: typeof (doc.source as JsonDoc)?.reference === "string" ? String((doc.source as JsonDoc)?.reference) : undefined,
-      rightsNote: typeof (doc.source as JsonDoc)?.rightsNote === "string" ? String((doc.source as JsonDoc)?.rightsNote) : undefined,
-    },
-    String(doc.status ?? "draft") as Reading["status"],
-    Number(doc.version ?? 1),
-    doc.publishedAt ? toDate(doc.publishedAt) : undefined,
-    toDate(doc.createdAt),
-    toDate(doc.updatedAt),
-  );
-}
-
-function mapReadingProgress(doc: JsonDoc): ReadingProgress {
-  return new ReadingProgress(
-    String(doc._id ?? ""),
-    String(doc.userId ?? ""),
-    String(doc.readingId ?? ""),
-    Number(doc.progressPercent ?? 0),
-    !!doc.completed,
-    toDate(doc.firstOpenedAt),
-    toDate(doc.lastOpenedAt),
-    doc.completedAt ? toDate(doc.completedAt) : undefined,
     toDate(doc.updatedAt),
   );
 }
@@ -176,27 +126,9 @@ function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshot {
     String(doc.userId ?? ""),
     String(doc.localDate ?? ""),
     Array.isArray(doc.enabledPractices) ? (doc.enabledPractices as Practice[]) : [],
-    !!((doc.reading as JsonDoc)?.completed),
     !!((doc.naamJap as JsonDoc)?.completed),
     !!((doc.meditation as JsonDoc)?.completed),
     !!doc.allComplete,
-    toDate(doc.createdAt),
-    toDate(doc.updatedAt),
-  );
-}
-
-function mapSong(doc: JsonDoc): Song {
-  return new Song(
-    String(doc._id ?? ""),
-    String(doc.title ?? ""),
-    String(doc.language ?? "en"),
-    Array.isArray(doc.traditionIds) ? doc.traditionIds.map(String) : [],
-    Array.isArray(doc.focusIds) ? doc.focusIds.map(String) : [],
-    Array.isArray(doc.tagIds) ? doc.tagIds.map(String) : [],
-    String(doc.status ?? "draft") as Song["status"],
-    Number(doc.durationSeconds ?? 0),
-    String(doc.audioAssetId ?? ""),
-    typeof doc.artworkAssetId === "string" ? doc.artworkAssetId : undefined,
     toDate(doc.createdAt),
     toDate(doc.updatedAt),
   );
@@ -241,16 +173,6 @@ function mapMediaAsset(doc: JsonDoc): MediaAsset {
     typeof doc.checksum === "string" ? doc.checksum : undefined,
     toDate(doc.createdAt),
     toDate(doc.updatedAt),
-  );
-}
-
-function mapFavorite(doc: JsonDoc): Favorite {
-  return new Favorite(
-    String(doc._id ?? ""),
-    String(doc.userId ?? ""),
-    String(doc.entityType ?? "reading") as Favorite["entityType"],
-    String(doc.entityId ?? ""),
-    toDate(doc.createdAt),
   );
 }
 
@@ -320,57 +242,6 @@ export class MongoUserPreferencesRepository implements UserPreferencesRepository
       throw new Error(`User preferences ${preferences._id} were not found`);
     }
     return preferences;
-  }
-}
-
-export class MongoReadingRepository implements ReadingRepository {
-  constructor(private readonly db: Db) {}
-
-  private collection(): Collection<JsonDoc> {
-    return this.db.collection<JsonDoc>("readings");
-  }
-
-  async findById(id: ObjectId): Promise<Reading | null> {
-    const doc = await this.collection().findOne({ _id: id } as JsonDoc);
-    return doc ? mapReading(doc as JsonDoc) : null;
-  }
-
-  async listPublished(): Promise<Reading[]> {
-    const docs = await this.collection().find({ status: "published" } as JsonDoc).toArray();
-    return docs.map((doc) => mapReading(doc as JsonDoc));
-  }
-
-  async findByIdWithUserProgress(_userId: ObjectId, readingId: ObjectId): Promise<Reading | null> {
-    return this.findById(readingId);
-  }
-
-  async findRecentByUser(userId: ObjectId, limit: number): Promise<ReadingProgress[]> {
-    const docs = await this.db.collection<JsonDoc>("reading_progress").find({ userId } as JsonDoc).sort({ lastOpenedAt: -1 }).limit(limit).toArray();
-    return docs.map((doc) => mapReadingProgress(doc as JsonDoc));
-  }
-}
-
-export class MongoReadingProgressRepository implements ReadingProgressRepository {
-  constructor(private readonly db: Db) {}
-
-  private collection(): Collection<JsonDoc> {
-    return this.db.collection<JsonDoc>("reading_progress");
-  }
-
-  async findByUserAndReading(userId: ObjectId, readingId: ObjectId): Promise<ReadingProgress | null> {
-    const doc = await this.collection().findOne({ userId, readingId } as JsonDoc);
-    return doc ? mapReadingProgress(doc as JsonDoc) : null;
-  }
-
-  async upsert(progress: ReadingProgress): Promise<ReadingProgress> {
-    const query = { userId: progress.userId, readingId: progress.readingId } as JsonDoc;
-    await this.collection().updateOne(query, { $set: { ...progress, updatedAt: new Date() } } as JsonDoc, { upsert: true });
-    return progress;
-  }
-
-  async listByUser(userId: ObjectId, limit: number): Promise<ReadingProgress[]> {
-    const docs = await this.collection().find({ userId } as JsonDoc).sort({ lastOpenedAt: -1 }).limit(limit).toArray();
-    return docs.map((doc) => mapReadingProgress(doc as JsonDoc));
   }
 }
 
@@ -468,11 +339,10 @@ export class MongoDailyProgressRepository implements DailyProgressRepository {
     const doc = await this.collection().findOne({ userId, localDate: date } as JsonDoc);
 
     if (!doc) {
-      return { reading: false, naam_jap: false, meditation: false };
+      return { naam_jap: false, meditation: false };
     }
 
     return {
-      reading: !!((doc.reading as JsonDoc)?.completed),
       naam_jap: !!((doc.naamJap as JsonDoc)?.completed),
       meditation: !!((doc.meditation as JsonDoc)?.completed),
     };
@@ -556,53 +426,6 @@ export class MongoTagRepository implements TagRepository {
   }
 }
 
-export class MongoSongRepository implements SongRepository {
-  constructor(private readonly db: Db) {}
-
-  private collection(): Collection<JsonDoc> {
-    return this.db.collection<JsonDoc>("songs");
-  }
-
-  async findById(id: ObjectId): Promise<Song | null> {
-    const doc = await this.collection().findOne({ _id: id } as JsonDoc);
-    return doc ? mapSong(doc as JsonDoc) : null;
-  }
-
-  async listPublished(): Promise<Song[]> {
-    const docs = await this.collection().find({ status: "published" } as JsonDoc).toArray();
-    return docs.map((doc) => mapSong(doc as JsonDoc));
-  }
-
-  async listByFilters(filters: {
-    language?: string;
-    tradition?: ObjectId;
-    focus?: ObjectId;
-    tag?: ObjectId;
-    cursor?: string;
-  }): Promise<{ items: Song[]; nextCursor: string | null }> {
-    const query: JsonDoc = { status: "published" };
-
-    if (filters.language) {
-      query.language = filters.language;
-    }
-    if (filters.tradition) {
-      query.traditionIds = { $in: [filters.tradition] };
-    }
-    if (filters.focus) {
-      query.focusIds = { $in: [filters.focus] };
-    }
-    if (filters.tag) {
-      query.tagIds = { $in: [filters.tag] };
-    }
-
-    const docs = await this.collection().find(query as JsonDoc).sort({ publishedAt: -1 }).limit(25).toArray();
-    return {
-      items: docs.map((doc) => mapSong(doc as JsonDoc)),
-      nextCursor: null,
-    };
-  }
-}
-
 export class MongoMediaAssetRepository implements MediaAssetRepository {
   constructor(private readonly db: Db) {}
 
@@ -618,32 +441,6 @@ export class MongoMediaAssetRepository implements MediaAssetRepository {
   async listByIds(ids: ObjectId[]): Promise<MediaAsset[]> {
     const docs = await this.collection().find({ _id: { $in: ids } } as JsonDoc).toArray();
     return docs.map((doc) => mapMediaAsset(doc as JsonDoc));
-  }
-}
-
-export class MongoFavoriteRepository implements FavoriteRepository {
-  constructor(private readonly db: Db) {}
-
-  private collection(): Collection<JsonDoc> {
-    return this.db.collection<JsonDoc>("favorites");
-  }
-
-  async listByUser(userId: ObjectId): Promise<Favorite[]> {
-    const docs = await this.collection().find({ userId } as JsonDoc).toArray();
-    return docs.map((doc) => mapFavorite(doc as JsonDoc));
-  }
-
-  async add(favorite: Favorite): Promise<Favorite> {
-    await this.collection().updateOne(
-      { userId: favorite.userId, entityType: favorite.entityType, entityId: favorite.entityId } as JsonDoc,
-      { $setOnInsert: { ...favorite } } as JsonDoc,
-      { upsert: true },
-    );
-    return favorite;
-  }
-
-  async remove(userId: ObjectId, entityType: Favorite["entityType"], entityId: ObjectId): Promise<void> {
-    await this.collection().deleteOne({ userId, entityType, entityId } as JsonDoc);
   }
 }
 
@@ -673,13 +470,6 @@ export const mongoRepositoryIndexDefinitions: Array<{ collection: string; index:
   { collection: "focuses", index: { status: 1, sortOrder: 1 } },
   { collection: "focuses", index: { traditionIds: 1, status: 1 } },
   { collection: "tags", index: { status: 1, type: 1 } },
-  { collection: "readings", index: { status: 1, language: 1, publishedAt: -1 } },
-  { collection: "readings", index: { status: 1, traditionIds: 1, publishedAt: -1 } },
-  { collection: "readings", index: { status: 1, focusIds: 1, publishedAt: -1 } },
-  { collection: "readings", index: { status: 1, tagIds: 1, publishedAt: -1 } },
-  { collection: "reading_progress", index: { userId: 1, readingId: 1 }, unique: true },
-  { collection: "reading_progress", index: { userId: 1, lastOpenedAt: -1 } },
-  { collection: "reading_progress", index: { userId: 1, completed: 1, updatedAt: -1 } },
   { collection: "mantras", index: { status: 1, language: 1, createdAt: -1 } },
   { collection: "naam_jap_sessions", index: { userId: 1, clientSessionId: 1 }, unique: true },
   { collection: "naam_jap_sessions", index: { userId: 1, startedAt: -1 } },
@@ -690,13 +480,7 @@ export const mongoRepositoryIndexDefinitions: Array<{ collection: string; index:
   { collection: "daily_progress", index: { userId: 1, localDate: 1 }, unique: true },
   { collection: "daily_progress", index: { userId: 1, localDate: -1 } },
   { collection: "daily_progress", index: { userId: 1, dayCompleted: 1, localDate: -1 } },
-  { collection: "songs", index: { status: 1, publishedAt: -1 } },
-  { collection: "songs", index: { status: 1, language: 1, publishedAt: -1 } },
-  { collection: "songs", index: { status: 1, focusIds: 1, publishedAt: -1 } },
-  { collection: "songs", index: { status: 1, tagIds: 1, publishedAt: -1 } },
   { collection: "media_assets", index: { status: 1, type: 1 } },
-  { collection: "favorites", index: { userId: 1, entityType: 1, entityId: 1 }, unique: true },
-  { collection: "playback_history", index: { userId: 1, clientEventId: 1 }, unique: true },
   { collection: "device_registrations", index: { platform: 1, pushToken: 1 }, unique: true },
 ];
 
