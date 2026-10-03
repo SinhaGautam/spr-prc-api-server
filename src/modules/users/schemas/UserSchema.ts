@@ -6,3 +6,12 @@ export const updateUserRequestSchema = z.object({
   timezone: z.string().trim().min(1).max(100),
   language: z.string().trim().min(2).max(10),
 });
+
+export const userProfileResponseSchema = z.object({
+  id: z.string(),
+  displayName: z.string().optional(),
+  email: z.string().optional(),
+  timezone: z.string(),
+  language: z.string(),
+  status: z.enum(["active", "inactive", "suspended"]),
+});
