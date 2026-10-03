@@ -1,5 +1,5 @@
-import { UserPreferences } from "../../../shared/domain/entities";
+import type { UserPreferencesEntity } from "../entities/UserPreferencesEntity";
 
-export type UserPreferencesEntity = UserPreferences;
+export type UserPreferences = UserPreferencesEntity;
 
 export const defaultEnabledPractices = ["naam_jap", "meditation"] as const;
