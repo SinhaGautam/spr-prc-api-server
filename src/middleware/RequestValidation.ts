@@ -6,9 +6,12 @@ export function validateRequest(schema: z.ZodTypeAny, source: "body" | "params" 
   return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req[source]);
     if (!result.success) {
-      return next(new ValidationError("Request validation failed"));
+      next(new ValidationError("Request validation failed"));
+      return;
     }
-    req[source] = result.data;
-    return next();
+
+    if (source === "body") req.body = result.data;
+    else Object.assign(req[source], result.data);
+    next();
   };
 }
