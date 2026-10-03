@@ -9,14 +9,14 @@ import type { TagEntity } from "../../modules/content/entities/TagEntity";
 import type { TraditionEntity } from "../../modules/content/entities/TraditionEntity";
 import type { UserEntity } from "../../modules/users/entities/UserEntity";
 import type { UserPreferencesEntity } from "../../modules/preferences/entities/UserPreferencesEntity";
-import type { IRepository, IReadRepository } from "./IRepository";
+import type { IRepository, IMutableRepository, IReadRepository } from "./IRepository";
 import type { ObjectId, Practice } from "../domain/types";
 
-export interface UserRepository extends IRepository<UserEntity, ObjectId> {
+export interface UserRepository extends IMutableRepository<UserEntity, ObjectId> {
   findByAuth(authProvider: string, authSubject: string): Promise<UserEntity | null>;
 }
 
-export interface UserPreferencesRepository extends IRepository<UserPreferencesEntity, ObjectId> {
+export interface UserPreferencesRepository extends IMutableRepository<UserPreferencesEntity, ObjectId> {
   findByUserId(userId: ObjectId): Promise<UserPreferencesEntity | null>;
 }
 
@@ -42,7 +42,7 @@ export interface MeditationSessionRepository extends IRepository<MeditationSessi
   listByUser(userId: ObjectId): Promise<MeditationSessionEntity[]>;
 }
 
-export interface DailyGoalRepository extends IRepository<DailyGoalSnapshotEntity, ObjectId> {
+export interface DailyGoalRepository {
   getForUserAndDate(userId: ObjectId, date: string): Promise<DailyGoalSnapshotEntity | null>;
   save(snapshot: DailyGoalSnapshotEntity): Promise<DailyGoalSnapshotEntity>;
 }
