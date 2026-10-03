@@ -1,13 +1,14 @@
 export interface IRepository<TEntity, TId = string> {
   findById(id: TId): Promise<TEntity | null>;
+}
+
+export interface IReadRepository<TEntity, TId = string> extends IRepository<TEntity, TId> {}
+
+export interface ICreateRepository<TEntity, TId = string> extends IRepository<TEntity, TId> {
   create(entity: TEntity): Promise<TEntity>;
 }
 
-export interface IMutableRepository<TEntity, TId = string> extends IRepository<TEntity, TId> {
+export interface IMutableRepository<TEntity, TId = string> extends ICreateRepository<TEntity, TId> {
   update(entity: TEntity): Promise<TEntity>;
   delete(id: TId): Promise<void>;
-}
-
-export interface IReadRepository<TEntity, TId = string> {
-  findById(id: TId): Promise<TEntity | null>;
 }
