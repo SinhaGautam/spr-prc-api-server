@@ -1,8 +1,10 @@
-import { Focus, Tag, Tradition } from "../../../shared/domain/entities";
+import type { FocusEntity } from "../entities/FocusEntity";
+import type { TagEntity } from "../entities/TagEntity";
+import type { TraditionEntity } from "../entities/TraditionEntity";
 
-export type TraditionEntity = Tradition;
-export type FocusEntity = Focus;
-export type TagEntity = Tag;
+export type Tradition = TraditionEntity;
+export type Focus = FocusEntity;
+export type Tag = TagEntity;
 
 export type ContentEntity = {
   id: string;
