@@ -134,11 +134,6 @@ const seed = {
       updatedAt: now,
     },
   ],
-  media_assets: [
-    {
-      _id: 'asset-audio-1',
-      type: 'audio',
-  ],
   device_registrations: [
     {
       _id: 'device-1',
