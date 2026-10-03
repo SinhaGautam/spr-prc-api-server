@@ -1,7 +1,8 @@
-import { NotFoundError } from "../../../lib/errors";
 import { BaseApiService } from "../../../core/application/BaseApiService";
+import { NotFoundError } from "../../../lib/errors";
 import type { UpdateUserRequest } from "../contracts/UserRequest";
 import type { UserProfileResponse } from "../contracts/UserResponse";
+import type { UserEntity } from "../entities/UserEntity";
 import type { UserRepository } from "./UserRepository";
 
 export class UserService extends BaseApiService {
