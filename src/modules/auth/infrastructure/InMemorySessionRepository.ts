@@ -10,10 +10,17 @@ export class InMemorySessionRepository implements SessionRepository {
   }
 
   async findByToken(token: string): Promise<AuthSession | null> {
-    return this.sessions.get(token) ?? null;
+    const session = this.sessions.get(token);
+    if (!session || session.expiresAt.getTime() <= Date.now()) {
+      this.sessions.delete(token);
+      return null;
+    }
+    return session;
   }
 
   async deleteByToken(token: string): Promise<void> {
     this.sessions.delete(token);
   }
 }
+
+export const sessionRepository = new InMemorySessionRepository();
