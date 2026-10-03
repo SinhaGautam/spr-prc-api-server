@@ -1,7 +1,8 @@
 export interface ProgressTodayResponse {
   date: string;
   completed: boolean;
-  goals: Array<{ practice: "naam_jap" | "meditation"; complete: boolean }>;
+  naam_jap: boolean;
+  meditation: boolean;
 }
 
 export interface ProgressHistoryResponse {
