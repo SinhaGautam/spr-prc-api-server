@@ -1,5 +1,5 @@
-import { User } from "../../../shared/domain/entities";
+import type { UserEntity } from "../entities/UserEntity";
 
-export type UserEntity = User;
+export type User = UserEntity;
 
 export const userStatuses = ["active", "inactive", "suspended"] as const;
