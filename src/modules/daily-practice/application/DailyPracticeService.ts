@@ -1,72 +1,69 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import { DailyGoalEntity } from "../entities/DailyGoalEntity";
+import type { DailyPracticeRepository } from "./DailyPracticeRepository";
 
-const goalsStore = new Map<string, { date: string; enabledPractices: Array<"naam_jap" | "meditation">; goals: Array<{ practice: "naam_jap" | "meditation"; target: string; progress: number; complete: boolean }>; allComplete: boolean }>();
-
-function getTodayKey() {
+function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export class DailyPracticeService {
-  async getGoalsToday(userId: string) {
-    try {
-      const today = getTodayKey();
-      const payload = goalsStore.get(`${userId}:${today}`) ?? {
-        date: today,
-        enabledPractices: ["naam_jap", "meditation"],
-        goals: [
-          { practice: "naam_jap", target: "108 repetitions", progress: 32, complete: false },
-          { practice: "meditation", target: "15 minutes", progress: 15, complete: true },
-        ],
-        allComplete: false,
-      };
+export class DailyPracticeService extends BaseApiService {
+  constructor(private readonly repository: DailyPracticeRepository) { super(); }
 
-      logger.debug({ userId, date: today }, "Resolved daily goals");
-      return payload;
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve daily goals");
-      throw error;
-    }
+  async getGoalsToday(userId: string) {
+    return this.execute("dailyPractice.getGoalsToday", async () => {
+      const date = today();
+      const existing = await this.repository.get(userId, date);
+      const goal = existing ?? await this.repository.save(
+        new DailyGoalEntity(userId, date, ["naam_jap", "meditation"], 108, 15),
+      );
+      return {
+        date: goal.date,
+        enabledPractices: goal.enabledPractices,
+        goals: [
+          { practice: "naam_jap" as const, target: `${goal.naamJapTarget} repetitions`, progress: goal.naamJapProgress, complete: goal.naamJapComplete },
+          { practice: "meditation" as const, target: `${goal.meditationTargetMinutes} minutes`, progress: goal.meditationProgressMinutes, complete: goal.meditationComplete },
+        ],
+        allComplete: goal.allComplete,
+      };
+    }, { userId });
   }
 
   async getProgressToday(userId: string) {
-    try {
-      const date = getTodayKey();
-      const payload = {
+    return this.execute("dailyPractice.getProgressToday", async () => {
+      const date = today();
+      const goal = await this.repository.get(userId, date);
+      return {
         date,
-        completed: false,
-        breakdown: { naam_jap: false, meditation: true },
+        completed: goal?.allComplete ?? false,
+        breakdown: {
+          naam_jap: goal?.naamJapComplete ?? false,
+          meditation: goal?.meditationComplete ?? false,
+        },
       };
-
-      logger.debug({ userId, date }, "Resolved daily progress");
-      return payload;
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve daily progress");
-      throw error;
-    }
+    }, { userId });
   }
 
   async getHistory(userId: string, month?: string) {
-    try {
-      const resolvedMonth = month ?? new Date().toISOString().slice(0, 7);
-      return {
-        month: resolvedMonth,
-        items: [
-          { date: `${resolvedMonth}-08`, complete: true },
-          { date: `${resolvedMonth}-09`, complete: false },
-        ],
-      };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve daily history");
-      throw error;
-    }
+    return this.execute("dailyPractice.getHistory", async () => {
+      const resolvedMonth = month ?? today().slice(0, 7);
+      const items = await this.repository.listByMonth(userId, resolvedMonth);
+      return { month: resolvedMonth, items: items.map((item) => ({ date: item.date, complete: item.allComplete })) };
+    }, { userId, month });
   }
 
   async getStreak(userId: string) {
-    try {
-      return { current: 2, longest: 5 };
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to resolve streak");
-      throw error;
-    }
+    return this.execute("dailyPractice.getStreak", async () => {
+      const currentDate = today();
+      const currentMonth = currentDate.slice(0, 7);
+      const items = await this.repository.listByMonth(userId, currentMonth);
+      const completeDates = new Set(items.filter((item) => item.allComplete).map((item) => item.date));
+      let current = 0;
+      const cursor = new Date(currentDate);
+      while (completeDates.has(cursor.toISOString().slice(0, 10))) {
+        current += 1;
+        cursor.setUTCDate(cursor.getUTCDate() - 1);
+      }
+      return { current, longest: current };
+    }, { userId });
   }
 }
