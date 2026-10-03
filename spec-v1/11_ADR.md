@@ -40,7 +40,7 @@ Every API module has a controller. Controllers contain HTTP concerns only and de
 All business entities are defined under the owning module's entities directory. shared/domain contains only shared primitives/types.
 
 ## ADR-014 — Capability-based generic repositories
-V1 provides small generic repository contracts: IRepository, IMutableRepository and IReadRepository. Module repositories extend only the capabilities they support.
+V1 provides small generic repository contracts: IRepository, ICreateRepository, IMutableRepository and IReadRepository. Module repositories extend only the capabilities they support.
 
 ## ADR-015 — Reusable service contracts without forced CRUD
 V1 provides generic service contracts for reuse, but application services remain specialized when their use cases are not CRUD.
