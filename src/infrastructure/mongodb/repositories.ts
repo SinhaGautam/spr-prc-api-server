@@ -1,16 +1,14 @@
 import type { Db, Collection } from "mongodb";
-import {
-  DailyGoalSnapshot,
-  Focus,
-  Mantra,
-  MediaAsset,
-  MeditationPreset,
-  MeditationSession,
-  Tag,
-  Tradition,
-  User,
-  UserPreferences,
-} from "../../shared/domain/entities";
+import { DailyGoalSnapshotEntity } from "../../modules/daily-practice/entities/DailyGoalSnapshotEntity";
+import { FocusEntity } from "../../modules/content/entities/FocusEntity";
+import { MantraEntity } from "../../modules/naam-jap/entities/MantraEntity";
+import { MediaAssetEntity } from "../../modules/content/entities/MediaAssetEntity";
+import { MeditationPresetEntity } from "../../modules/meditation/entities/MeditationPresetEntity";
+import { MeditationSessionEntity } from "../../modules/meditation/entities/MeditationSessionEntity";
+import { TagEntity } from "../../modules/content/entities/TagEntity";
+import { TraditionEntity } from "../../modules/content/entities/TraditionEntity";
+import { UserEntity } from "../../modules/users/entities/UserEntity";
+import { UserPreferencesEntity } from "../../modules/preferences/entities/UserPreferencesEntity";
 import type {
   DailyGoalRepository,
   DailyProgressRepository,
@@ -37,13 +35,13 @@ function toDate(value: unknown): Date {
 }
 
 function mapUser(doc: JsonDoc): User {
-  return new User(
+  return new UserEntity(
     String(doc._id ?? ""),
     String(doc.authProvider ?? ""),
     String(doc.authSubject ?? ""),
     String(doc.timezone ?? "UTC"),
     String(doc.language ?? "en"),
-    String(doc.status ?? "active") as User["status"],
+    String(doc.status ?? "active") as UserEntity["status"],
     typeof doc.displayName === "string" ? doc.displayName : undefined,
     typeof doc.email === "string" ? doc.email : undefined,
     toDate(doc.createdAt),
@@ -52,11 +50,11 @@ function mapUser(doc: JsonDoc): User {
 }
 
 function mapUserPreferences(doc: JsonDoc): UserPreferences {
-  return new UserPreferences(
+  return new UserPreferencesEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
     String(doc.traditionId ?? ""),
-    Array.isArray(doc.enabledPractices) ? (doc.enabledPractices as string[] as UserPreferences["enabledPractices"]) : [],
+    Array.isArray(doc.enabledPractices) ? (doc.enabledPractices as string[] as UserPreferencesEntity["enabledPractices"]) : [],
     String(doc.language ?? "en"),
     {
       enabled: !!(doc.reminder && (doc.reminder as JsonDoc).enabled),
@@ -71,14 +69,14 @@ function mapUserPreferences(doc: JsonDoc): UserPreferences {
 }
 
 function mapMantra(doc: JsonDoc): Mantra {
-  return new Mantra(
+  return new MantraEntity(
     String(doc._id ?? ""),
     String(doc.name ?? ""),
     String(doc.text ?? ""),
     Array.isArray(doc.traditionIds) ? doc.traditionIds.map(String) : [],
     Array.isArray(doc.focusIds) ? doc.focusIds.map(String) : [],
     String(doc.language ?? "en"),
-    String(doc.status ?? "draft") as Mantra["status"],
+    String(doc.status ?? "draft") as MantraEntity["status"],
     typeof doc.transliteration === "string" ? doc.transliteration : undefined,
     typeof doc.pronunciationNote === "string" ? doc.pronunciationNote : undefined,
     typeof doc.meaning === "string" ? doc.meaning : undefined,
@@ -89,11 +87,11 @@ function mapMantra(doc: JsonDoc): Mantra {
 }
 
 function mapMeditationPreset(doc: JsonDoc): MeditationPreset {
-  return new MeditationPreset(
+  return new MeditationPresetEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
     Number(doc.durationMinutes ?? 0),
-    String(doc.status ?? "draft") as MeditationPreset["status"],
+    String(doc.status ?? "draft") as MeditationPresetEntity["status"],
     Number(doc.sortOrder ?? 0),
     typeof doc.startBellAssetId === "string" ? doc.startBellAssetId : undefined,
     typeof doc.endBellAssetId === "string" ? doc.endBellAssetId : undefined,
@@ -104,7 +102,7 @@ function mapMeditationPreset(doc: JsonDoc): MeditationPreset {
 }
 
 function mapMeditationSession(doc: JsonDoc): MeditationSession {
-  return new MeditationSession(
+  return new MeditationSessionEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
     Number(doc.plannedMinutes ?? 0),
@@ -114,13 +112,13 @@ function mapMeditationSession(doc: JsonDoc): MeditationSession {
     String(doc.clientSessionId ?? ""),
     typeof doc.presetId === "string" ? doc.presetId : undefined,
     doc.endedAt ? toDate(doc.endedAt) : undefined,
-    typeof doc.completionReason === "string" ? (doc.completionReason as MeditationSession["completionReason"]) : undefined,
+    typeof doc.completionReason === "string" ? (doc.completionReason as MeditationSessionEntity["completionReason"]) : undefined,
     toDate(doc.createdAt),
   );
 }
 
 function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshot {
-  return new DailyGoalSnapshot(
+  return new DailyGoalSnapshotEntity(
     String(doc._id ?? ""),
     String(doc.userId ?? ""),
     String(doc.localDate ?? ""),
@@ -134,12 +132,12 @@ function mapDailyGoalSnapshot(doc: JsonDoc): DailyGoalSnapshot {
 }
 
 function mapFocus(doc: JsonDoc): Focus {
-  return new Focus(
+  return new FocusEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
     String(doc.name ?? ""),
     Array.isArray(doc.traditionIds) ? doc.traditionIds.map(String) : [],
-    String(doc.status ?? "draft") as Focus["status"],
+    String(doc.status ?? "draft") as FocusEntity["status"],
     Number(doc.sortOrder ?? 0),
     Array.isArray(doc.aliases) ? doc.aliases.map(String) : undefined,
     toDate(doc.createdAt),
@@ -148,26 +146,26 @@ function mapFocus(doc: JsonDoc): Focus {
 }
 
 function mapTag(doc: JsonDoc): Tag {
-  return new Tag(
+  return new TagEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
     String(doc.name ?? ""),
-    String(doc.type ?? "theme") as Tag["type"],
-    String(doc.status ?? "draft") as Tag["status"],
+    String(doc.type ?? "theme") as TagEntity["type"],
+    String(doc.status ?? "draft") as TagEntity["status"],
     toDate(doc.createdAt),
     toDate(doc.updatedAt),
   );
 }
 
 function mapMediaAsset(doc: JsonDoc): MediaAsset {
-  return new MediaAsset(
+  return new MediaAssetEntity(
     String(doc._id ?? ""),
-    String(doc.type ?? "audio") as MediaAsset["type"],
+    String(doc.type ?? "audio") as MediaAssetEntity["type"],
     String(doc.storageKey ?? ""),
     String(doc.cdnUrl ?? ""),
     String(doc.mimeType ?? "application/octet-stream"),
     Number(doc.sizeBytes ?? 0),
-    String(doc.status ?? "ready") as MediaAsset["status"],
+    String(doc.status ?? "ready") as MediaAssetEntity["status"],
     typeof doc.durationSeconds === "number" ? doc.durationSeconds : undefined,
     typeof doc.checksum === "string" ? doc.checksum : undefined,
     toDate(doc.createdAt),
@@ -176,11 +174,11 @@ function mapMediaAsset(doc: JsonDoc): MediaAsset {
 }
 
 function mapTradition(doc: JsonDoc): Tradition {
-  return new Tradition(
+  return new TraditionEntity(
     String(doc._id ?? ""),
     String(doc.key ?? ""),
     String(doc.name ?? ""),
-    String(doc.status ?? "draft") as Tradition["status"],
+    String(doc.status ?? "draft") as TraditionEntity["status"],
     Number(doc.sortOrder ?? 0),
     toDate(doc.createdAt),
     toDate(doc.updatedAt),
@@ -204,12 +202,12 @@ export class MongoUserRepository implements UserRepository {
     return doc ? mapUser(doc as JsonDoc) : null;
   }
 
-  async create(user: User): Promise<User> {
+  async create(user: User): Promise<UserEntity> {
     await this.users().insertOne({ ...user, _id: user._id } as JsonDoc);
     return user;
   }
 
-  async update(user: User): Promise<User> {
+  async update(user: User): Promise<UserEntity> {
     const result = await this.users().replaceOne({ _id: user._id } as JsonDoc, { ...user, updatedAt: new Date() } as JsonDoc);
     if (result.matchedCount === 0) {
       throw new Error(`User ${user._id} was not found`);
@@ -230,12 +228,12 @@ export class MongoUserPreferencesRepository implements UserPreferencesRepository
     return doc ? mapUserPreferences(doc as JsonDoc) : null;
   }
 
-  async create(preferences: UserPreferences): Promise<UserPreferences> {
+  async create(preferences: UserPreferences): Promise<UserPreferencesEntity> {
     await this.collection().insertOne({ ...preferences, _id: preferences._id } as JsonDoc);
     return preferences;
   }
 
-  async update(preferences: UserPreferences): Promise<UserPreferences> {
+  async update(preferences: UserPreferences): Promise<UserPreferencesEntity> {
     const result = await this.collection().replaceOne({ _id: preferences._id } as JsonDoc, { ...preferences, updatedAt: new Date() } as JsonDoc);
     if (result.matchedCount === 0) {
       throw new Error(`User preferences ${preferences._id} were not found`);
@@ -251,7 +249,7 @@ export class MongoMantraRepository implements MantraRepository {
     return this.db.collection<JsonDoc>("mantras");
   }
 
-  async listPublished(): Promise<Mantra[]> {
+  async listPublished(): Promise<MantraEntity[]> {
     const docs = await this.collection().find({ status: "published" } as JsonDoc).toArray();
     return docs.map((doc) => mapMantra(doc as JsonDoc));
   }
@@ -271,7 +269,7 @@ export class MongoMeditationPresetRepository implements MeditationPresetReposito
     return this.db.collection<JsonDoc>("meditation_presets");
   }
 
-  async listPublished(): Promise<MeditationPreset[]> {
+  async listPublished(): Promise<MeditationPresetEntity[]> {
     const docs = await this.collection().find({ status: "published" } as JsonDoc).toArray();
     return docs.map((doc) => mapMeditationPreset(doc as JsonDoc));
   }
@@ -289,7 +287,7 @@ export class MongoMeditationSessionRepository implements MeditationSessionReposi
     return this.db.collection<JsonDoc>("meditation_sessions");
   }
 
-  async create(session: MeditationSession): Promise<MeditationSession> {
+  async create(session: MeditationSession): Promise<MeditationSessionEntity> {
     await this.collection().insertOne({ ...session, _id: session._id } as JsonDoc);
     return session;
   }
@@ -299,7 +297,7 @@ export class MongoMeditationSessionRepository implements MeditationSessionReposi
     return doc ? mapMeditationSession(doc as JsonDoc) : null;
   }
 
-  async listByUser(userId: ObjectId): Promise<MeditationSession[]> {
+  async listByUser(userId: ObjectId): Promise<MeditationSessionEntity[]> {
     const docs = await this.collection().find({ userId } as JsonDoc).sort({ startedAt: -1 }).toArray();
     return docs.map((doc) => mapMeditationSession(doc as JsonDoc));
   }
@@ -317,7 +315,7 @@ export class MongoDailyGoalRepository implements DailyGoalRepository {
     return doc ? mapDailyGoalSnapshot(doc as JsonDoc) : null;
   }
 
-  async save(snapshot: DailyGoalSnapshot): Promise<DailyGoalSnapshot> {
+  async save(snapshot: DailyGoalSnapshot): Promise<DailyGoalSnapshotEntity> {
     await this.collection().updateOne(
       { userId: snapshot.userId, localDate: snapshot.date } as JsonDoc,
       { $set: { ...snapshot, updatedAt: new Date() } } as JsonDoc,
@@ -401,7 +399,7 @@ export class MongoFocusRepository implements FocusRepository {
     return doc ? mapFocus(doc as JsonDoc) : null;
   }
 
-  async listPublished(): Promise<Focus[]> {
+  async listPublished(): Promise<FocusEntity[]> {
     const docs = await this.collection().find({ status: "published" } as JsonDoc).sort({ sortOrder: 1 }).toArray();
     return docs.map((doc) => mapFocus(doc as JsonDoc));
   }
@@ -419,7 +417,7 @@ export class MongoTagRepository implements TagRepository {
     return doc ? mapTag(doc as JsonDoc) : null;
   }
 
-  async listPublished(): Promise<Tag[]> {
+  async listPublished(): Promise<TagEntity[]> {
     const docs = await this.collection().find({ status: "published" } as JsonDoc).sort({ name: 1 }).toArray();
     return docs.map((doc) => mapTag(doc as JsonDoc));
   }
@@ -437,7 +435,7 @@ export class MongoMediaAssetRepository implements MediaAssetRepository {
     return doc ? mapMediaAsset(doc as JsonDoc) : null;
   }
 
-  async listByIds(ids: ObjectId[]): Promise<MediaAsset[]> {
+  async listByIds(ids: ObjectId[]): Promise<MediaAssetEntity[]> {
     const docs = await this.collection().find({ _id: { $in: ids } } as JsonDoc).toArray();
     return docs.map((doc) => mapMediaAsset(doc as JsonDoc));
   }
@@ -455,7 +453,7 @@ export class MongoTraditionRepository implements TraditionRepository {
     return doc ? mapTradition(doc as JsonDoc) : null;
   }
 
-  async listPublished(): Promise<Tradition[]> {
+  async listPublished(): Promise<TraditionEntity[]> {
     const docs = await this.collection().find({ status: "published" } as JsonDoc).sort({ sortOrder: 1 }).toArray();
     return docs.map((doc) => mapTradition(doc as JsonDoc));
   }
