@@ -65,7 +65,7 @@ unrelated to the product
 
 The backend must support a defined account deletion process.
 
-Deletion policy must specify: - user profile - preferences - reading
+Deletion policy must specify: - user profile - preferences - removed legacy content
 progress - activity sessions - favorites - device registrations -
 playback history
 
