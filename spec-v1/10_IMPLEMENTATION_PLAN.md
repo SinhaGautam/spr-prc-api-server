@@ -1,115 +1,167 @@
-# Spec-Driven Implementation Plan --- Backend V1
+# Spec-Driven Implementation Plan — Backend V1
 
 ## Rule
 
-Implementation proceeds in vertical slices. Each slice must point back
-to specifications and tests.
+Implementation proceeds in vertical slices. Each slice must point back to specifications and tests.
 
-## Phase 0 --- Foundation
+## Phase 0 — Foundation
 
-Implement only: - project structure - TypeScript configuration -
-lint/format - environment configuration - error model -
-logging/correlation ID - MongoDB connection abstraction - health
-endpoints - test infrastructure
+Implement only:
+- project structure
+- TypeScript configuration
+- lint/format
+- environment configuration
+- error model
+- logging/correlation ID
+- MongoDB connection abstraction
+- health endpoints
+- test infrastructure
 
-Acceptance: - application starts - test suite runs - database
-connectivity is tested - no domain feature yet
+Acceptance:
+- application starts
+- test suite runs
+- database connectivity is tested
+- no domain feature yet
 
-## Phase 1 --- Identity & preferences
+## Phase 1 — Identity & preferences
 
-Specs: - `00_PROJECT_SPEC` - `01_MODULE_SPEC` - `02_DB_SCHEMA` -
-`03_API_SPEC` - `06_TEST_SPEC` - `09_SECURITY_PRIVACY_SPEC`
+Specs:
+- `00_PROJECT_SPEC`
+- `01_MODULE_SPEC`
+- `02_DB_SCHEMA`
+- `03_API_SPEC`
+- `06_TEST_SPEC`
+- `09_SECURITY_PRIVACY_SPEC`
 
-Implement: - auth integration - user profile - preferences -
-traditions - focuses - tags - onboarding bootstrap
+Implement:
+- auth integration
+- user profile
+- preferences
+- traditions
+- focuses
+- tags
+- onboarding
 
-Acceptance: - user can complete onboarding - preferences are persisted -
-authorization tests pass
+Acceptance:
+- user can complete onboarding
+- preferences persist
+- authorization tests pass
+- only `naam_jap` and `meditation` are accepted as practices
 
-## Phase 2 --- Reading
+## Phase 2 — Naam Jap
 
-Implement: - reading catalogue - reading detail - reading progress -
-explicit completion
+Implement:
+- mantra catalogue
+- session creation
+- idempotency
+- daily aggregation
 
-Acceptance: - published-only discovery - completion is idempotent -
-progress is user-owned - reading completion updates today's practice
-state
+Acceptance:
+- valid session persists
+- target can be completed
+- offline retry is safe
+- duplicate request does not double-count
 
-## Phase 3 --- Naam Jap
+## Phase 3 — Meditation
 
-Implement: - mantra catalogue - session creation - idempotency - daily
-aggregation
+Implement:
+- presets
+- session persistence
+- completion semantics
+- daily aggregation
 
-Acceptance: - 108 repetitions can be completed - offline retry is safe -
-duplicate request does not double-count
+Acceptance:
+- 5/10/15/20 minute presets work
+- timer remains client-side
+- completed minutes update daily progress correctly
 
-## Phase 4 --- Meditation
+## Phase 4 — Daily progress & history
 
-Implement: - presets - session persistence - completion semantics -
-daily aggregation
+Implement:
+- daily goal snapshot for Naam Jap + Meditation
+- today's progress
+- calendar history
+- current/longest streak
 
-Acceptance: - 5/10/15/20 minute presets work - timer itself remains
-client-side - completed minutes update daily progress correctly
+Acceptance:
+- 2/2 completion is deterministic
+- timezone tests pass
+- only Naam Jap and Meditation affect progress
 
-## Phase 5 --- Daily progress & history
+## Phase 5 — Notifications
 
-Implement: - daily goal snapshot - today's progress - calendar history -
-current/longest streak
+Implement only after reminder UX is final:
+- device registration
+- reminder preference
+- scheduled reminder delivery
 
-Acceptance: - 3/3 completion is deterministic - songs do not affect
-progress - timezone tests pass
+Acceptance:
+- timezone respected
+- disabled reminder stops future delivery
+- reminders reference only active V1 practices
 
-## Phase 6 --- Songs
+## Phase 6 — Production hardening
 
-Implement: - song catalogue - filtering - CDN media metadata -
-favorites - limited playback events
+- indexes verified against query plans
+- backup/restore procedure
+- rate limits
+- security review
+- dependency audit
+- load test critical endpoints
+- failure/retry tests
+- observability
+- App Store release readiness
 
-Acceptance: - song playback works from CDN - favorite works - no daily
-progress mutation occurs
+## Explicit V1 removal verification
 
-## Phase 7 --- Notifications
+Before V1 release, search the complete source tree and tests for:
+```text
+reading
+readings
+song
+songs
+playback
+readingId
+songId
+favorites
+```
 
-Implement only after reminder UX is final: - device registration -
-reminder preference - scheduled reminder delivery
+Remove active implementation references, routes, repositories, schemas, seed data, and business logic for these removed features.
 
-Acceptance: - timezone respected - disabled reminder stops future
-delivery - notifications do not imply song goals
-
-## Phase 8 --- Production hardening
-
--   indexes verified against query plans
--   backup/restore procedure
--   rate limits
--   security review
--   dependency audit
--   load test critical endpoints
--   failure/retry tests
--   observability
--   App Store release readiness
+Historical specification text may mention them only when documenting that they are removed from V1.
 
 ## Traceability requirement
 
 Every pull request/change must state:
-
-``` text
+```text
 Requirement:
 Spec:
 Domain rule:
 API:
 DB:
 Tests:
+Removal impact:
 ```
 
-If one of these is not applicable, explicitly state why.
+If one is not applicable, explicitly state why.
 
 ## AI coding rule
 
-AI coding tools may: - generate boilerplate - implement already-approved
-functions - generate tests from approved rules - refactor without
-changing behaviour
+AI coding tools may:
+- generate boilerplate
+- implement already-approved functions
+- generate tests from approved rules
+- refactor without changing behaviour
 
-AI coding tools may not: - invent endpoints - invent collections -
-invent fields - change business rules - add infrastructure - add
-dependencies - change authentication behaviour
+AI coding tools may not:
+- invent endpoints
+- invent collections
+- invent fields
+- invent Reading/Song features
+- invent generic content/playback/favorites APIs
+- change business rules
+- add infrastructure
+- add dependencies
+- change authentication behaviour
 
 without a spec update/approval.
