@@ -11,3 +11,23 @@ export const createNaamJapSessionSchema = z.object({
   completed: z.boolean(),
   clientSessionId: z.string().trim().min(1).max(255),
 });
+
+export const mantraResponseSchema = z.object({
+  items: z.array(z.object({ id: z.string(), name: z.string(), text: z.string(), language: z.string() })),
+});
+
+export const naamJapSessionResponseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  targetRepetitions: z.number(),
+  completedRepetitions: z.number(),
+  startedAt: z.string().datetime(),
+  durationSeconds: z.number(),
+  completed: z.boolean(),
+  clientSessionId: z.string(),
+  createdAt: z.string().datetime(),
+  mantraId: z.string().optional(),
+  mantraTextSnapshot: z.string().optional(),
+  endedAt: z.string().datetime().optional(),
+  idempotent: z.boolean().optional(),
+});
