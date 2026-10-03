@@ -1,21 +1,12 @@
 import { Router, type IRouter } from "express";
-import { logger } from "../../lib/logger";
-import { getMongoDb } from "../../lib/mongodb";
+import { asyncHandler } from "../../middleware/AsyncHandler";
 import { requireAuthentication } from "../../middleware/auth";
-import { NaamJapService } from "./application/naamJapService";
-import { NaamJapController } from "./controllers/naamJapController";
-import { InMemoryNaamJapSessionRepository, MongoNaamJapSessionRepository } from "./infrastructure/naamJapRepository";
+import { NaamJapController } from "./controllers/NaamJapController";
 
-const router: IRouter = Router();
-const mongoDb = getMongoDb();
-const repository = mongoDb ? new MongoNaamJapSessionRepository(mongoDb) : new InMemoryNaamJapSessionRepository();
-const service = new NaamJapService(repository);
-const controller = new NaamJapController(service);
-
-logger.debug({ hasMongo: !!mongoDb }, "Initialized naam jap module repository");
-
-router.get("/mantras", controller.listMantras);
-router.post("/naam-jap/sessions", requireAuthentication, controller.createSession);
-router.get("/naam-jap/sessions", requireAuthentication, controller.listSessions);
-
-export default router;
+export function createNaamJapRoutes(controller: NaamJapController): IRouter {
+  const router = Router();
+  router.get("/mantras", asyncHandler((req, res) => controller.listMantras(req, res)));
+  router.post("/naam-jap/sessions", requireAuthentication, asyncHandler((req, res) => controller.createSession(req, res)));
+  router.get("/naam-jap/sessions", requireAuthentication, asyncHandler((req, res) => controller.listSessions(req, res)));
+  return router;
+}
