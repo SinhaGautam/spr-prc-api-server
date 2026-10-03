@@ -1,6 +1,6 @@
 import { logger } from "../../../lib/logger";
 
-const goalsStore = new Map<string, { date: string; enabledPractices: Array<"reading" | "naam_jap" | "meditation">; goals: Array<{ practice: "reading" | "naam_jap" | "meditation"; target: string; progress: number; complete: boolean }>; allComplete: boolean }>();
+const goalsStore = new Map<string, { date: string; enabledPractices: Array<"naam_jap" | "meditation">; goals: Array<{ practice: "naam_jap" | "meditation"; target: string; progress: number; complete: boolean }>; allComplete: boolean }>();
 
 function getTodayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -12,9 +12,8 @@ export class DailyPracticeService {
       const today = getTodayKey();
       const payload = goalsStore.get(`${userId}:${today}`) ?? {
         date: today,
-        enabledPractices: ["reading", "naam_jap", "meditation"],
+        enabledPractices: ["naam_jap", "meditation"],
         goals: [
-          { practice: "reading", target: "1 reading", progress: 0, complete: false },
           { practice: "naam_jap", target: "108 repetitions", progress: 32, complete: false },
           { practice: "meditation", target: "15 minutes", progress: 15, complete: true },
         ],
@@ -35,7 +34,7 @@ export class DailyPracticeService {
       const payload = {
         date,
         completed: false,
-        breakdown: { reading: false, naam_jap: false, meditation: true },
+        breakdown: { naam_jap: false, meditation: true },
       };
 
       logger.debug({ userId, date }, "Resolved daily progress");
