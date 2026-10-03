@@ -22,9 +22,7 @@ Entities are module-owned business data and invariants. They do not depend on Ex
 Repositories contain persistence access and mapping only.
 
 Reusable capability interfaces:
-- IRepository<TEntity, TId>
-- IMutableRepository<TEntity, TId>
-- IReadRepository<TEntity, TId>
+- IRepository<TEntity, TId>, ICreateRepository<TEntity>, IMutableRepository<TEntity, TId>, IReadRepository<TEntity, TId>
 
 Module repositories extend the smallest suitable interface and add domain-specific queries.
 
