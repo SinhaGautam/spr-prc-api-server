@@ -1,50 +1,58 @@
-import { logger } from "../../../lib/logger";
+import { BaseApiService } from "../../../core/application/BaseApiService";
+import type { UpdatePreferencesRequest } from "../contracts/PreferencesRequest";
+import { UserPreferencesEntity } from "../entities/UserPreferencesEntity";
+import type { PreferencesRepository } from "./PreferencesRepository";
 
-type PreferencePayload = {
-  traditionId: string;
-  primaryFocusId?: string;
-  enabledPractices: Array<"naam_jap" | "meditation">;
-  naamJapTarget?: number;
-  meditationTargetMinutes?: number;
-  reminder?: {
-    enabled: boolean;
-    localTime?: string;
-  };
-};
-
-const preferencesStore = new Map<string, PreferencePayload>();
-
-const defaultPreferences: PreferencePayload = {
+const defaults = {
   traditionId: "trad-hindu",
-  enabledPractices: ["naam_jap", "meditation"],
+  enabledPractices: ["naam_jap", "meditation"] as Array<"naam_jap" | "meditation">,
+  language: "en",
   reminder: { enabled: false, localTime: "07:00" },
 };
 
-export class PreferencesService {
+export class PreferencesService extends BaseApiService {
+  constructor(private readonly repository: PreferencesRepository) { super(); }
+
   async getPreferences(userId: string) {
-    try {
-      return preferencesStore.get(userId) ?? defaultPreferences;
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to load preferences");
-      throw error;
-    }
+    return this.execute("preferences.get", async () => {
+      const current = await this.repository.findByUserId(userId);
+      return this.toResponse(userId, current ?? new UserPreferencesEntity(
+        `preferences-${userId}`, userId, defaults.traditionId, defaults.enabledPractices,
+        defaults.language, defaults.reminder,
+      ));
+    }, { userId });
   }
 
-  async updatePreferences(userId: string, payload: PreferencePayload) {
-    try {
-      const normalized = {
-        ...defaultPreferences,
-        ...payload,
-        reminder: payload.reminder ?? defaultPreferences.reminder,
-        enabledPractices: payload.enabledPractices,
-      };
+  async updatePreferences(userId: string, request: UpdatePreferencesRequest) {
+    return this.execute("preferences.update", async () => {
+      const current = await this.repository.findByUserId(userId);
+      const entity = new UserPreferencesEntity(
+        current?._id ?? `preferences-${userId}`,
+        userId,
+        request.traditionId,
+        request.enabledPractices,
+        current?.language ?? defaults.language,
+        request.reminder ?? current?.reminder ?? defaults.reminder,
+        request.primaryFocusId,
+        request.naamJapTarget ? { repetitions: request.naamJapTarget } : current?.naamJapTarget,
+        request.meditationTargetMinutes ? { minutes: request.meditationTargetMinutes } : current?.meditationTarget,
+        current?.createdAt,
+        new Date(),
+      );
+      const saved = await this.repository.save(entity);
+      return this.toResponse(userId, saved);
+    }, { userId });
+  }
 
-      preferencesStore.set(userId, normalized);
-      logger.info({ userId, enabledPractices: normalized.enabledPractices }, "User preferences updated");
-      return normalized;
-    } catch (error) {
-      logger.error({ err: error, userId }, "Failed to update preferences");
-      throw error;
-    }
+  private toResponse(userId: string, value: UserPreferencesEntity) {
+    return {
+      userId,
+      traditionId: value.traditionId,
+      primaryFocusId: value.primaryFocusId,
+      enabledPractices: value.enabledPractices,
+      naamJapTarget: value.naamJapTarget?.repetitions,
+      meditationTargetMinutes: value.meditationTarget?.minutes,
+      reminder: value.reminder,
+    };
   }
 }
