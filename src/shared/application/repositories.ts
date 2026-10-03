@@ -17,7 +17,7 @@ export interface UserRepository extends ICreateRepository<UserEntity, ObjectId> 
   update(user: UserEntity): Promise<UserEntity>;
 }
 
-export interface UserPreferencesRepository extends ICreateRepository<UserPreferencesEntity, ObjectId> {
+export interface UserPreferencesRepository {
   findByUserId(userId: ObjectId): Promise<UserPreferencesEntity | null>;
   update(preferences: UserPreferencesEntity): Promise<UserPreferencesEntity>;
 }
