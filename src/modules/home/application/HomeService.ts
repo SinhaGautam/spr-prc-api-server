@@ -15,7 +15,12 @@ export class HomeService extends BaseApiService {
       const preset = presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? { id: "preset-15", durationMinutes: 15 };
       return {
         greeting: "May your practice be gentle and steady.",
-        dailyGoals: goals.goals,
+        dailyGoals: goals.goals.map((goal) => ({
+          practice: goal.practice,
+          targetLabel: goal.target,
+          progress: goal.progress,
+          complete: goal.complete,
+        })),
         defaultMantra: { id: "mantra-1", name: "Hari Naam", text: "Hare Krishna" },
         meditationPreset: preset,
       };
