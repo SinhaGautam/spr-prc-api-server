@@ -29,7 +29,7 @@ Terminate current session where supported.
 ### `GET /bootstrap`
 
 Returns minimum data required to build onboarding: - traditions -
-available focuses - available practice types - meditation presets -
+available focuses - available practice types: Naam Jap, Meditation - meditation presets -
 supported languages
 
 ### `PUT /me/preferences`
@@ -62,30 +62,6 @@ preset - optional song discovery entry
 
 The endpoint is a read composition endpoint. It must not expose raw
 database documents.
-
-## Reading
-
-### `GET /readings`
-
-Filters: - language - tradition - focus - tag - cursor
-
-Only published content.
-
-### `GET /readings/:readingId`
-
-Returns reading content and provenance.
-
-### `PUT /readings/:readingId/progress`
-
-Updates user reading progress.
-
-### `POST /readings/:readingId/complete`
-
-Marks the reading complete.
-
-Requirements: - idempotent - updates reading progress - emits an
-application-level completion result to daily-practice - must not
-double-count completion
 
 ## Naam Jap
 
@@ -156,38 +132,6 @@ Returns calendar-oriented history using pagination/month ranges.
 Returns: - current streak - longest streak
 
 Streak semantics are defined in `04_DOMAIN_RULES.md`.
-
-## Songs
-
-### `GET /songs`
-
-Filters: - language - tradition - focus - tag - cursor
-
-### `GET /songs/:songId`
-
-Returns: - metadata - CDN audio URL - artwork URL - duration
-
-### `POST /songs/:songId/playback-events`
-
-Optional V1 endpoint for meaningful playback events.
-
-Event types: - started - resumed - completed - stopped
-
-No heartbeat events.
-
-## Favorites
-
-### `GET /favorites`
-
-Filter by entity type.
-
-### `PUT /favorites/:entityType/:entityId`
-
-Idempotently creates favorite.
-
-### `DELETE /favorites/:entityType/:entityId`
-
-Idempotently removes favorite.
 
 ## Notifications
 
