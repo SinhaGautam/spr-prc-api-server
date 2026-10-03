@@ -1,15 +1,11 @@
 import type {
   DailyGoalSnapshot,
-  Favorite,
   Focus,
   Mantra,
   MediaAsset,
   MeditationPreset,
   MeditationSession,
   NaamJapSession,
-  Reading,
-  ReadingProgress,
-  Song,
   Tag,
   Tradition,
   User,
@@ -33,17 +29,6 @@ export interface UserPreferencesRepository {
 export interface CatalogRepository<T> {
   findById(id: ObjectId): Promise<T | null>;
   listPublished(): Promise<T[]>;
-}
-
-export interface ReadingRepository extends CatalogRepository<Reading> {
-  findByIdWithUserProgress(userId: ObjectId, readingId: ObjectId): Promise<Reading | null>;
-  findRecentByUser(userId: ObjectId, limit: number): Promise<ReadingProgress[]>;
-}
-
-export interface ReadingProgressRepository {
-  findByUserAndReading(userId: ObjectId, readingId: ObjectId): Promise<ReadingProgress | null>;
-  upsert(progress: ReadingProgress): Promise<ReadingProgress>;
-  listByUser(userId: ObjectId, limit: number): Promise<ReadingProgress[]>;
 }
 
 export interface MantraRepository {
@@ -90,25 +75,9 @@ export interface TagRepository {
   listPublished(): Promise<Tag[]>;
 }
 
-export interface SongRepository extends CatalogRepository<Song> {
-  listByFilters(filters: {
-    language?: string;
-    tradition?: ObjectId;
-    focus?: ObjectId;
-    tag?: ObjectId;
-    cursor?: string;
-  }): Promise<{ items: Song[]; nextCursor: string | null }>;
-}
-
 export interface MediaAssetRepository {
   findById(id: ObjectId): Promise<MediaAsset | null>;
   listByIds(ids: ObjectId[]): Promise<MediaAsset[]>;
-}
-
-export interface FavoriteRepository {
-  listByUser(userId: ObjectId): Promise<Favorite[]>;
-  add(favorite: Favorite): Promise<Favorite>;
-  remove(userId: ObjectId, entityType: Favorite["entityType"], entityId: ObjectId): Promise<void>;
 }
 
 export type TraditionRepository = CatalogRepository<Tradition>;
