@@ -1,61 +1,50 @@
-import type {
-  DailyGoalSnapshot,
-  Focus,
-  Mantra,
-  MediaAsset,
-  MeditationPreset,
-  MeditationSession,
-  NaamJapSession,
-  Tag,
-  Tradition,
-  User,
-  UserPreferences,
-} from "../domain/entities";
+import type { DailyGoalSnapshotEntity } from "../../modules/daily-practice/entities/DailyGoalSnapshotEntity";
+import type { FocusEntity } from "../../modules/content/entities/FocusEntity";
+import type { MantraEntity } from "../../modules/naam-jap/entities/MantraEntity";
+import type { MediaAssetEntity } from "../../modules/content/entities/MediaAssetEntity";
+import type { MeditationPresetEntity } from "../../modules/meditation/entities/MeditationPresetEntity";
+import type { MeditationSessionEntity } from "../../modules/meditation/entities/MeditationSessionEntity";
+import type { NaamJapSessionEntity } from "../../modules/naam-jap/entities/NaamJapSessionEntity";
+import type { TagEntity } from "../../modules/content/entities/TagEntity";
+import type { TraditionEntity } from "../../modules/content/entities/TraditionEntity";
+import type { UserEntity } from "../../modules/users/entities/UserEntity";
+import type { UserPreferencesEntity } from "../../modules/preferences/entities/UserPreferencesEntity";
+import type { IRepository, IReadRepository } from "./IRepository";
 import type { ObjectId, Practice } from "../domain/types";
 
-export interface UserRepository {
-  findById(id: ObjectId): Promise<User | null>;
-  findByAuth(authProvider: string, authSubject: string): Promise<User | null>;
-  create(user: User): Promise<User>;
-  update(user: User): Promise<User>;
+export interface UserRepository extends IRepository<UserEntity, ObjectId> {
+  findByAuth(authProvider: string, authSubject: string): Promise<UserEntity | null>;
 }
 
-export interface UserPreferencesRepository {
-  findByUserId(userId: ObjectId): Promise<UserPreferences | null>;
-  create(preferences: UserPreferences): Promise<UserPreferences>;
-  update(preferences: UserPreferences): Promise<UserPreferences>;
+export interface UserPreferencesRepository extends IRepository<UserPreferencesEntity, ObjectId> {
+  findByUserId(userId: ObjectId): Promise<UserPreferencesEntity | null>;
 }
 
-export interface CatalogRepository<T> {
-  findById(id: ObjectId): Promise<T | null>;
-  listPublished(): Promise<T[]>;
+export interface CatalogRepository<TEntity> extends IReadRepository<TEntity, ObjectId> {
+  listPublished(): Promise<TEntity[]>;
 }
 
-export interface MantraRepository {
-  listPublished(): Promise<Mantra[]>;
-  findById(id: ObjectId): Promise<Mantra | null>;
+export interface MantraRepository extends IReadRepository<MantraEntity, ObjectId> {
+  listPublished(): Promise<MantraEntity[]>;
 }
 
-export interface NaamJapSessionRepository {
-  create(session: NaamJapSession): Promise<NaamJapSession>;
-  findByClientSessionId(userId: ObjectId, clientSessionId: string): Promise<NaamJapSession | null>;
-  listByUser(userId: ObjectId): Promise<NaamJapSession[]>;
+export interface NaamJapSessionRepository extends IRepository<NaamJapSessionEntity, ObjectId> {
+  findByClientSessionId(userId: ObjectId, clientSessionId: string): Promise<NaamJapSessionEntity | null>;
+  listByUser(userId: ObjectId): Promise<NaamJapSessionEntity[]>;
 }
 
-export interface MeditationPresetRepository {
-  listPublished(): Promise<MeditationPreset[]>;
-  findById(id: ObjectId): Promise<MeditationPreset | null>;
+export interface MeditationPresetRepository extends IReadRepository<MeditationPresetEntity, ObjectId> {
+  listPublished(): Promise<MeditationPresetEntity[]>;
 }
 
-export interface MeditationSessionRepository {
-  create(session: MeditationSession): Promise<MeditationSession>;
-  findByClientSessionId(userId: ObjectId, clientSessionId: string): Promise<MeditationSession | null>;
-  listByUser(userId: ObjectId): Promise<MeditationSession[]>;
+export interface MeditationSessionRepository extends IRepository<MeditationSessionEntity, ObjectId> {
+  findByClientSessionId(userId: ObjectId, clientSessionId: string): Promise<MeditationSessionEntity | null>;
+  listByUser(userId: ObjectId): Promise<MeditationSessionEntity[]>;
 }
 
-export interface DailyGoalRepository {
-  getForUserAndDate(userId: ObjectId, date: string): Promise<DailyGoalSnapshot | null>;
-  save(snapshot: DailyGoalSnapshot): Promise<DailyGoalSnapshot>;
+export interface DailyGoalRepository extends IRepository<DailyGoalSnapshotEntity, ObjectId> {
+  getForUserAndDate(userId: ObjectId, date: string): Promise<DailyGoalSnapshotEntity | null>;
+  save(snapshot: DailyGoalSnapshotEntity): Promise<DailyGoalSnapshotEntity>;
 }
 
 export interface DailyProgressRepository {
@@ -65,19 +54,16 @@ export interface DailyProgressRepository {
   getLongestStreak(userId: ObjectId): Promise<number>;
 }
 
-export interface FocusRepository {
-  findById(id: ObjectId): Promise<Focus | null>;
-  listPublished(): Promise<Focus[]>;
+export interface FocusRepository extends IReadRepository<FocusEntity, ObjectId> {
+  listPublished(): Promise<FocusEntity[]>;
 }
 
-export interface TagRepository {
-  findById(id: ObjectId): Promise<Tag | null>;
-  listPublished(): Promise<Tag[]>;
+export interface TagRepository extends IReadRepository<TagEntity, ObjectId> {
+  listPublished(): Promise<TagEntity[]>;
 }
 
-export interface MediaAssetRepository {
-  findById(id: ObjectId): Promise<MediaAsset | null>;
-  listByIds(ids: ObjectId[]): Promise<MediaAsset[]>;
+export interface MediaAssetRepository extends IReadRepository<MediaAssetEntity, ObjectId> {
+  listByIds(ids: ObjectId[]): Promise<MediaAssetEntity[]>;
 }
 
-export type TraditionRepository = CatalogRepository<Tradition>;
+export type TraditionRepository = CatalogRepository<TraditionEntity>;
