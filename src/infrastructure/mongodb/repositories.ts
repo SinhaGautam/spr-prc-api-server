@@ -63,7 +63,6 @@ function mapUserPreferences(doc: JsonDoc): UserPreferences {
       localTime: String((doc.reminder as JsonDoc)?.localTime ?? "07:00"),
     },
     typeof doc.primaryFocusId === "string" ? doc.primaryFocusId : undefined,
-    doc.readingTarget as UserPreferences["readingTarget"],
     typeof doc.naamJapTarget === "object" && doc.naamJapTarget !== null ? (doc.naamJapTarget as { repetitions: number }) : undefined,
     typeof doc.meditationTarget === "object" && doc.meditationTarget !== null ? (doc.meditationTarget as { minutes: number }) : undefined,
     toDate(doc.createdAt),
