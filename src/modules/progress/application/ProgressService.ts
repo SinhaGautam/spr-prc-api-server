@@ -8,7 +8,6 @@ export class ProgressService {
         date,
         completed: false,
         goals: [
-          { practice: "reading", complete: false },
           { practice: "naam_jap", complete: false },
           { practice: "meditation", complete: true },
         ],
