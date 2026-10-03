@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { DependencyError, NotFoundError } from "../../../lib/errors";
 import { logger } from "../../../lib/logger";
-import type { NaamJapSessionRepository } from "../../../shared/application/repositories";
-import { NaamJapSession } from "../../../shared/domain/entities";
+import type { NaamJapSessionEntityRepository } from "../../../shared/application/repositories";
+import { NaamJapSessionEntityEntity } from "../entities/NaamJapSessionEntityEntity";
 
-export type NaamJapSessionInput = {
+export type NaamJapSessionEntityInput = {
   mantraId?: string;
   mantraText?: string;
   targetRepetitions: number;
@@ -30,13 +30,13 @@ const mantraCatalog: MantraCatalogItem[] = [
 ];
 
 export class NaamJapService {
-  constructor(private readonly repository: NaamJapSessionRepository, private readonly log = logger) {}
+  constructor(private readonly repository: NaamJapSessionEntityRepository, private readonly log = logger) {}
 
   getAvailableMantras(): MantraCatalogItem[] {
     return [...mantraCatalog];
   }
 
-  async createSession(input: NaamJapSessionInput, userId: string): Promise<{ session: NaamJapSession; idempotent: boolean }> {
+  async createSession(input: NaamJapSessionEntityInput, userId: string): Promise<{ session: NaamJapSessionEntity; idempotent: boolean }> {
     try {
       const existingSession = await this.repository.findByClientSessionId(userId, input.clientSessionId);
       if (existingSession) {
@@ -49,7 +49,7 @@ export class NaamJapService {
         throw new NotFoundError(`Mantra ${input.mantraId} was not found`);
       }
 
-      const session = new NaamJapSession(
+      const session = new NaamJapSessionEntity(
         `naam-jap-session-${randomUUID()}`,
         userId,
         input.targetRepetitions,
@@ -79,7 +79,7 @@ export class NaamJapService {
     }
   }
 
-  async listSessionsForUser(userId: string): Promise<NaamJapSession[]> {
+  async listSessionsForUser(userId: string): Promise<NaamJapSessionEntity[]> {
     try {
       return await this.repository.listByUser(userId);
     } catch (error) {
