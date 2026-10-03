@@ -78,12 +78,10 @@ Application services MUST log meaningful business/application outcomes.
 Examples:
 
 ``` text
-reading.completed
 naam_jap.session.created
 meditation.session.completed
 daily.progress.updated
 daily.goal.completed
-song.playback.completed
 activity.duplicate_replay
 ```
 
