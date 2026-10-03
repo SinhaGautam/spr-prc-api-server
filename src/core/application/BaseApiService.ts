@@ -1,4 +1,4 @@
-import { logger } from "../logging/logger";
+import { logger } from "../logging/Logger";
 
 export type ServiceContext = Record<string, unknown>;
 
