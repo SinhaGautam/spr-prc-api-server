@@ -51,23 +51,6 @@ Must test: - supported preset - unsupported duration - completed
 session - interrupted session - duplicate clientSessionId - actual
 duration aggregation - offline retry
 
-### Reading
-
-Must test: - only published content visible - archived content hidden -
-progress update - explicit completion - repeated completion -
-unauthorized access to another user's progress
-
-### Songs
-
-Must test: - published songs visible - archived songs hidden - filtering
-by language/tradition/focus/tag - playback event accepted - duplicate
-playback event ignored - song cannot alter daily progress
-
-### Favorites
-
-Must test: - create favorite - duplicate favorite - remove favorite -
-unauthorized entity manipulation - unsupported entity type
-
 ## API integration tests
 
 Every V1 endpoint must cover: - success - validation failure -
@@ -94,26 +77,15 @@ cannot silently break the Expo client.
 Create account
 → choose Hindu
 → choose Ram as optional focus
-→ enable Reading + Naam Jap + Meditation
+→ enable Naam Jap + Meditation
 → set targets
 → arrive at Today
-→ complete Reading
 → complete 108 Naam Jap
 → complete Meditation
-→ Today shows 3/3
+→ Today shows 2/2
 → day qualifies for streak
 ```
 
-### Scenario B --- Songs
-
-``` text
-Open Songs
-→ filter by focus
-→ play song
-→ favorite song
-→ return Home
-→ daily progress unchanged
-```
 
 ### Scenario C --- Offline Naam Jap
 
