@@ -13,7 +13,7 @@ export class BootstrapService {
           { id: "focus-krishna", key: "krishna", name: "Krishna", traditionIds: ["trad-hindu"], status: "active" },
           { id: "focus-mahavira", key: "mahavira", name: "Mahavira", traditionIds: ["trad-jain"], status: "active" },
         ],
-        practices: ["reading", "naam_jap", "meditation"],
+        practices: ["naam_jap", "meditation"],
         meditationPresets: [
           { id: "preset-5", key: "five_minutes", durationMinutes: 5, status: "active" },
           { id: "preset-10", key: "ten_minutes", durationMinutes: 10, status: "active" },
