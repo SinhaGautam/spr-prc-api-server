@@ -3,7 +3,7 @@ import { logger } from "../../../lib/logger";
 type PreferencePayload = {
   traditionId: string;
   primaryFocusId?: string;
-  enabledPractices: Array<"reading" | "naam_jap" | "meditation">;
+  enabledPractices: Array<"naam_jap" | "meditation">;
   naamJapTarget?: number;
   meditationTargetMinutes?: number;
   reminder?: {
@@ -16,7 +16,7 @@ const preferencesStore = new Map<string, PreferencePayload>();
 
 const defaultPreferences: PreferencePayload = {
   traditionId: "trad-hindu",
-  enabledPractices: ["reading", "naam_jap", "meditation"],
+  enabledPractices: ["naam_jap", "meditation"],
   reminder: { enabled: false, localTime: "07:00" },
 };
 
