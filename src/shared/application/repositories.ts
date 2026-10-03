@@ -9,15 +9,17 @@ import type { TagEntity } from "../../modules/content/entities/TagEntity";
 import type { TraditionEntity } from "../../modules/content/entities/TraditionEntity";
 import type { UserEntity } from "../../modules/users/entities/UserEntity";
 import type { UserPreferencesEntity } from "../../modules/preferences/entities/UserPreferencesEntity";
-import type { IRepository, IMutableRepository, IReadRepository } from "./IRepository";
+import type { IRepository, IReadRepository } from "./IRepository";
 import type { ObjectId, Practice } from "../domain/types";
 
-export interface UserRepository extends IMutableRepository<UserEntity, ObjectId> {
+export interface UserRepository extends IRepository<UserEntity, ObjectId> {
   findByAuth(authProvider: string, authSubject: string): Promise<UserEntity | null>;
+  update(user: UserEntity): Promise<UserEntity>;
 }
 
-export interface UserPreferencesRepository extends IMutableRepository<UserPreferencesEntity, ObjectId> {
+export interface UserPreferencesRepository extends IRepository<UserPreferencesEntity, ObjectId> {
   findByUserId(userId: ObjectId): Promise<UserPreferencesEntity | null>;
+  update(preferences: UserPreferencesEntity): Promise<UserPreferencesEntity>;
 }
 
 export interface CatalogRepository<TEntity> extends IReadRepository<TEntity, ObjectId> {
