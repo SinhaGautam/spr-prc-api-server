@@ -11,7 +11,7 @@ const service = new PreferencesService();
 const preferencesSchema = z.object({
   traditionId: z.string().min(1),
   primaryFocusId: z.string().optional(),
-  enabledPractices: z.array(z.enum(["reading", "naam_jap", "meditation"])).min(1),
+  enabledPractices: z.array(z.enum(["naam_jap", "meditation"])).min(1),
   naamJapTarget: z.number().int().positive().optional(),
   meditationTargetMinutes: z.number().int().positive().optional(),
   reminder: z
