@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { BaseApiService } from "../../../core/application/BaseApiService";
 import type { RegisterDeviceRequest, UpdateReminderRequest } from "../contracts/NotificationRequest";
 import { DeviceRegistrationEntity } from "../entities/DeviceRegistrationEntity";
@@ -20,10 +19,10 @@ export class NotificationsService extends BaseApiService {
   async registerDevice(userId: string, request: RegisterDeviceRequest) {
     return this.execute("notifications.registerDevice", async () => {
       const device = await this.repository.saveDevice(new DeviceRegistrationEntity(
-        randomUUID(), userId, request.token, request.platform,
+        request.deviceId, userId, request.token, request.platform,
       ));
       return { deviceId: device.id, platform: device.platform, createdAt: device.createdAt.toISOString() };
-    }, { userId, platform: request.platform });
+    }, { userId, deviceId: request.deviceId, platform: request.platform });
   }
 
   async deleteDevice(userId: string, deviceId: string): Promise<void> {
