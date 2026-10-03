@@ -26,7 +26,7 @@ export const BootstrapResponse = zod.object({
       status: zod.enum(["active", "archived"]),
     }),
   ),
-  practices: zod.array(zod.enum(["reading", "naam_jap", "meditation"])),
+  practices: zod.array(zod.enum(["naam_jap", "meditation"])),
   meditationPresets: zod.array(
     zod.object({
       id: zod.string(),
