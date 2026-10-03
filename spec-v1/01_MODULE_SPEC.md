@@ -84,7 +84,7 @@ Domain modules must not depend on controllers.
 
 -   tradition
 -   optional primary devotional focus
--   enabled daily practices
+-   enabled daily practices: Naam Jap and Meditation
 -   daily target values
 -   reminder preference
 -   language
@@ -97,14 +97,6 @@ Domain modules must not depend on controllers.
 -   tags
 -   language
 -   provenance
-
-### reading
-
--   list published readings
--   retrieve a reading
--   record progress
--   complete reading
--   return recent/continue reading
 
 ### naam-jap
 
@@ -133,19 +125,6 @@ Domain modules must not depend on controllers.
 -   return calendar/history
 -   calculate current/longest streak using defined rules
 -   never infer completion from songs
-
-### songs
-
--   list/filter published songs
--   retrieve song metadata
--   return streaming asset metadata
--   optionally record meaningful playback events
--   no daily goal integration
-
-### favorites
-
--   add/remove/list favorites
--   enforce ownership
 
 ### notifications
 
