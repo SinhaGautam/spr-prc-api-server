@@ -17,12 +17,10 @@ export class HomeService extends BaseApiService {
         this.meditationService.isEnabled(),
         this.naamJapService.isEnabled(),
       ]);
-      const [presets, mantras] = await Promise.all([
-        meditationEnabled ? this.meditationService.listPresets() : Promise.resolve({ items: [] as Array<{ id: string; key?: string; durationMinutes: number }> }),
-        naamJapEnabled ? this.naamJapService.listMantras() : Promise.resolve({ items: [] as Array<{ id: string; name: string; text: string }> }),
-      ]);
+      const presets = meditationEnabled
+        ? await this.meditationService.listPresets()
+        : { items: [] as Array<{ id: string; key?: string; durationMinutes: number }> };
       const preset = presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? null;
-      const mantra = mantras.items[0] ?? null;
       const availablePractices = new Set([
         ...(naamJapEnabled ? ["naam_jap"] : []),
         ...(meditationEnabled ? ["meditation"] : []),
@@ -33,7 +31,6 @@ export class HomeService extends BaseApiService {
         dailyGoals: goals.goals.filter((goal) => availablePractices.has(goal.practice)).map((goal) => ({
           practice: goal.practice, targetLabel: goal.target, progress: goal.progress, complete: goal.complete,
         })),
-        defaultMantra: mantra,
         meditationPreset: preset,
       };
     }, { userId });

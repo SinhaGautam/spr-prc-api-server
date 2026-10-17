@@ -8,6 +8,5 @@ export const homeTodayResponseSchema = z.object({
     progress: z.number(),
     complete: z.boolean(),
   })),
-  defaultMantra: z.object({ id: z.string(), name: z.string(), text: z.string() }).nullable(),
   meditationPreset: z.object({ id: z.string(), key: z.string().optional(), durationMinutes: z.number() }).nullable(),
 });

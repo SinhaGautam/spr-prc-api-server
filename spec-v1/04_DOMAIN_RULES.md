@@ -39,7 +39,7 @@ No V1 business rule may read Reading completion, Song playback, or count either 
 Same client idempotency key means the same logical activity; duplicate replay must not double-count.
 
 ## Rule 9 — Historical snapshots
-Retain immutable information needed to understand historical activity such as mantra text snapshot, target values, date, and timezone.
+Retain immutable information needed to understand historical activity such as target values, date, and timezone. Existing historical Naam Jap documents may retain legacy mantra text snapshots, but new sessions do not depend on or write mantra catalogue fields.
 
 ## Rule 10 — Stillness
 No badges, points, rankings, aggressive reminder mechanics, or engagement loops without a new approved requirement.

@@ -91,28 +91,10 @@ const seed = {
     { _id: 'tag-practice', key: 'practice', name: 'Practice', type: 'intent', status: 'published', createdAt: now, updatedAt: now },
     { _id: 'tag-festival', key: 'festival', name: 'Festival', type: 'festival', status: 'published', createdAt: now, updatedAt: now },
   ],
-  mantras: [
-    {
-      _id: 'mantra-1',
-      name: 'Ram Ram',
-      text: 'राम राम',
-      transliteration: 'Ram Ram',
-      pronunciationNote: 'Repeat gently with a relaxed breath.',
-      meaning: 'Remember the divine name with calm and devotion.',
-      traditionIds: ['trad-hindu'],
-      focusIds: ['focus-ram'],
-      language: 'hi',
-      status: 'published',
-      createdAt: now,
-      updatedAt: now,
-    },
-  ],
   naam_jap_sessions: [
     {
       _id: 'naam-jap-session-1',
       userId: 'user-1',
-      mantraId: 'mantra-1',
-      mantraTextSnapshot: 'राम राम',
       targetRepetitions: 108,
       completedRepetitions: 108,
       startedAt: now,

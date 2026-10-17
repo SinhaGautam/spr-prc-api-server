@@ -7,8 +7,6 @@ import type { NaamJapService } from "../application/NaamJapService";
 export class NaamJapController extends BaseController {
   constructor(private readonly service: NaamJapService) { super(); }
 
-  async listMantras(_req: Request, res: Response): Promise<void> { this.ok(res, await this.service.listMantras()); }
-
   async createSession(req: Request, res: Response): Promise<void> {
     const parsed = createNaamJapSessionSchema.safeParse(req.body);
     if (!parsed.success) throw new ValidationError("Invalid naam jap session payload");
