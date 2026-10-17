@@ -40,6 +40,7 @@ test("feature availability is MongoDB-backed and V1 seed includes active feature
   const seed = fs.readFileSync(path.join(root, "scripts", "seed-mongo.mjs"), "utf8");
   assert.match(service, /repository\.listAll\(\)/);
   assert.doesNotMatch(service, /V1_ENABLED_FEATURES/);
+  assert.match(service, /repository\\.listAll\\(\\)/);
   assert.match(repository, /collection<FeatureDocument>\("features"\)/);
   assert.match(repository, /document\.isActive !== "boolean"/);
   assert.match(schema, /isActive: z\.boolean\(\)/);
