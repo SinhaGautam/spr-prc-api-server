@@ -1,9 +1,9 @@
 import { pathToFileURL } from "node:url";
 import { closeDatabase, connectDatabase } from "./infrastructure/mongodb/MongoDatabase";
 import { logger } from "./core/logging/Logger";
-import { config } from "./core/config/Environment";
+import { E } from "./core/config/Environment";
 
-export async function startServer(port = config.port) {
+export async function startServer(port = E.PORT) {
   await connectDatabase();
   const { default: app } = await import("./app");
 

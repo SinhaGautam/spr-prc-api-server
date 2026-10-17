@@ -3,7 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./core/logging/Logger";
-import { config } from "./core/config/Environment";
+import { E } from "./core/config/Environment";
 import { authenticationMiddleware } from "./middleware/auth";
 import { rateLimitMiddleware } from "./middleware/rate-limit";
 import { requestIdMiddleware } from "./middleware/request-id";
@@ -16,7 +16,7 @@ app.disable("x-powered-by");
 app.use(requestIdMiddleware);
 app.use(
   pinoHttp({
-    logger: logger.child({ service: config.appName }),
+    logger: logger.child({ service: E.APP_NAME }),
     customProps: (req) => ({ requestId: req.id, userId: req.user?.userId }),
     serializers: {
       req(req) { return { id: req.id, method: req.method, url: req.url?.split("?")[0] }; },
@@ -27,7 +27,7 @@ app.use(
 app.use(securityHeadersMiddleware);
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || config.corsOrigins.includes(origin)) return callback(null, true);
+    if (!origin || E.CORS_ORIGINS.includes(origin)) return callback(null, true);
     callback(new Error("Origin not allowed by CORS"));
   },
   credentials: true,

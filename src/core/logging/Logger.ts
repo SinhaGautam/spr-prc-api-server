@@ -1,10 +1,10 @@
 import pino from "pino";
-import { config } from "../config/Environment";
+import { E } from "../config/Environment";
 
 export const logger = pino({
-  name: config.appName,
-  level: config.logLevel,
-  base: { service: config.appName, environment: config.environment },
+  name: E.APP_NAME,
+  level: E.LOG_LEVEL,
+  base: { service: E.APP_NAME, environment: E.NODE_ENV },
   redact: [
     "req.headers.authorization",
     "req.headers.cookie",
@@ -13,7 +13,7 @@ export const logger = pino({
     "token",
     "pushToken",
   ],
-  ...(config.environment === "production"
+  ...(E.NODE_ENV === "production"
     ? {}
     : { transport: { target: "pino-pretty", options: { colorize: true } } }),
 });
