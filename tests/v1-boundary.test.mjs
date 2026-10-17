@@ -29,7 +29,8 @@ test("V1 practice contracts contain only Naam Jap and meditation", () => {
 test("V1 seed contains no removed feature collections", () => {
   const seed = fs.readFileSync(path.join(root, "scripts", "seed-mongo.mjs"), "utf8");
   assert.doesNotMatch(seed, /\b(readings|reading_progress|songs|favorites|playback_history)\s*:/);
-  assert.doesNotMatch(seed, /\breading\b/);
+  assert.match(seed, /_id: 'spr-reading-enabled',[\s\S]*?isActive: false/);
+  assert.match(seed, /_id: 'spr-song-enabled',[\s\S]*?isActive: false/);
 });
 
 test("feature availability is MongoDB-backed and V1 seed includes active feature records", () => {
@@ -46,5 +47,7 @@ test("feature availability is MongoDB-backed and V1 seed includes active feature
   assert.match(index, /\["features", \{ key: 1 \}, \{ unique: true \}\]/);
   assert.match(seed, /_id: 'spr-naamjaap-enabled',[\s\S]*?isActive: true/);
   assert.match(seed, /_id: 'spr-meditation-enabled',[\s\S]*?isActive: true/);
+  assert.match(seed, /_id: 'spr-reading-enabled',[\s\S]*?isActive: false/);
+  assert.match(seed, /_id: 'spr-song-enabled',[\s\S]*?isActive: false/);
   assert.match(seed, /collectionName === 'features'/);
 });
