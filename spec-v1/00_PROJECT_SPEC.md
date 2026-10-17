@@ -88,7 +88,7 @@ Only:
 - `meditation`
 
 ### Content tags
-Tags remain only where needed for V1-supported content such as mantra/meditation assets. Do not create deity/category matrices.
+Tags remain only where needed for V1-supported meditation assets. Do not create deity/category matrices.
 
 ## 6. Daily-goal semantics
 A user's enabled practices define the daily goal set.
@@ -108,15 +108,14 @@ It may return:
 - greeting/context
 - today's goals
 - today's progress
-- default mantra
 - meditation preset
 
 It MUST NOT return reading, song, playback, or favorites data.
 
 ## 8. Naam Jap
 Retain V1 focused counting:
-- curated mantra/name library
-- configured default mantra
+- no mantra catalogue or mantra-selection endpoint
+- devotional name is presentation/configuration owned by the client in V1
 - target defaults may include 108
 - local counting
 - pause/resume on client
@@ -149,7 +148,7 @@ Node.js + TypeScript Backend
         |                    |
         v                    v
    MongoDB Atlas       Object Storage + CDN
- application data     meditation/mantra media
+ application data     meditation media
 ```
 
 No Redis, Kafka, or microservices are added solely because of this scope reduction.
@@ -198,7 +197,7 @@ The repository MUST NOT contain active `reading`, `songs`, or playback-specific 
 - `users`: profile/account lifecycle
 - `preferences`: tradition/focus/enabled practice/targets/reminder
 - `content`: V1 taxonomy and publication metadata
-- `naam-jap`: mantra catalogue and japa sessions
+- `naam-jap`: japa sessions and repetition progress
 - `meditation`: presets, sessions, meditation media references
 - `daily-practice`: daily snapshots/aggregation
 - `progress`: history/streak calculations
@@ -209,7 +208,7 @@ The repository MUST NOT contain active `reading`, `songs`, or playback-specific 
 No module directly writes another module's persistence structures without an explicit application-level contract.
 
 ## 14. Offline expectations
-Offline support remains for onboarding/preferences, selected mantra, active Naam Jap, active meditation timer, and unsynced V1 activity sessions.
+Offline support remains for onboarding/preferences, active Naam Jap, active meditation timer, and unsynced V1 activity sessions.
 
 No V1 offline synchronization exists for Reading, Songs, playback, or reading progress.
 
