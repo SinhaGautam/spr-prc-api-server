@@ -32,6 +32,7 @@ export const DailyGoalSummary = zod.object({
 export const BootstrapResponse = zod.object({
   traditions: zod.array(zod.object({ id: zod.string(), key: zod.string(), name: zod.string() })),
   focuses: zod.array(zod.object({ id: zod.string(), key: zod.string(), name: zod.string(), traditionIds: zod.array(zod.string()) })),
+  tags: zod.array(zod.object({ id: zod.string(), key: zod.string(), name: zod.string(), type: zod.string() })),
   practices: zod.array(Practice),
   meditationPresets: zod.array(zod.object({ id: zod.string(), key: zod.string(), durationMinutes: zod.number() })),
   languages: zod.array(zod.string()),
