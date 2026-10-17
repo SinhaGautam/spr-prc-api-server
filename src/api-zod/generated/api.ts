@@ -11,14 +11,14 @@ export const ApiErrorResponse = zod.object({
 });
 
 export const UserPreferencesRequest = zod.object({
-  traditionId: zod.string().min(1),
-  primaryFocusId: zod.string().optional(),
+  traditionId: zod.string().trim().min(1).max(100),
+  primaryFocusId: zod.string().trim().min(1).max(100).optional(),
   enabledPractices: zod.array(Practice).min(1).max(2),
-  naamJapTarget: zod.number().int().positive().optional(),
-  meditationTargetMinutes: zod.number().int().positive().optional(),
+  naamJapTarget: zod.number().int().positive().max(100000).optional(),
+  meditationTargetMinutes: zod.number().int().positive().max(180).optional(),
   reminder: zod.object({
     enabled: zod.boolean(),
-    localTime: zod.string().optional(),
+    localTime: zod.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
   }).optional(),
 });
 
@@ -32,7 +32,7 @@ export const DailyGoalSummary = zod.object({
 export const BootstrapResponse = zod.object({
   traditions: zod.array(zod.object({ id: zod.string(), key: zod.string(), name: zod.string() })),
   focuses: zod.array(zod.object({ id: zod.string(), key: zod.string(), name: zod.string(), traditionIds: zod.array(zod.string()) })),
-  practices: zod.tuple([zod.literal("naam_jap"), zod.literal("meditation")]),
+  practices: zod.array(Practice),
   meditationPresets: zod.array(zod.object({ id: zod.string(), key: zod.string(), durationMinutes: zod.number() })),
   languages: zod.array(zod.string()),
   reminderDefaults: zod.object({ enabled: zod.boolean(), localTime: zod.string() }),
