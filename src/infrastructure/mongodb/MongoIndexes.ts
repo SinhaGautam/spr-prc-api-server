@@ -2,6 +2,12 @@ import type { Db } from "mongodb";
 
 const indexes = [
   ["users", { authProvider: 1, authSubject: 1 }, { unique: true }],
+  ["users", { username: 1 }, { unique: true, sparse: true }],
+  ["installations", { installationId: 1 }, { unique: true }],
+  ["installations", { userId: 1, lastSeenAt: -1 }, {}],
+  ["sessions", { tokenHash: 1 }, { unique: true }],
+  ["sessions", { userId: 1, expiresAt: -1 }, {}],
+  ["sessions", { expiresAt: 1 }, { expireAfterSeconds: 0 }],
   ["users", { status: 1, createdAt: -1 }, {}],
   ["user_preferences", { userId: 1 }, { unique: true }],
   ["traditions", { status: 1, sortOrder: 1 }, {}],
