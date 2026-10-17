@@ -48,9 +48,7 @@ These capabilities may be reconsidered as a future version. They must not be rep
 11. Return on later days
 
 ## 4. Feature decisions
-Feature availability is stored in the MongoDB `features` collection. Each server feature has a stable `key` and required boolean `isActive`. `GET /features` returns both active and inactive records from MongoDB; the backend must not use a hard-coded feature list or in-memory fallback. A new empty database is seeded with Naam Jap and Meditation active.
-
-Feature availability is stored in the MongoDB `features` collection. Every feature record has a stable `key` and required boolean `isActive`; `GET /features` returns both active and inactive records. The backend must not use a hard-coded fallback list. V1 seeds Naam Jap and Meditation as active only when the feature collection is empty.
+Feature availability is stored in the MongoDB `features` collection. Each server feature has a stable `key` and required boolean `isActive`; `GET /features` returns both active and inactive records from MongoDB, with no hard-coded or in-memory fallback. The seed process ensures Naam Jap and Meditation records exist without overwriting their existing activation values.
 
 | Capability | V1 decision |
 |---|---|
