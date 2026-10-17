@@ -95,8 +95,6 @@ const seed = {
     {
       _id: 'naam-jap-session-1',
       userId: 'user-1',
-      mantraId: 'mantra-1',
-      mantraTextSnapshot: 'राम राम',
       targetRepetitions: 108,
       completedRepetitions: 108,
       startedAt: now,
