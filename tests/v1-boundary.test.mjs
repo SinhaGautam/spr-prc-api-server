@@ -31,3 +31,20 @@ test("V1 seed contains no removed feature collections", () => {
   assert.doesNotMatch(seed, /\b(readings|reading_progress|songs|favorites|playback_history)\s*:/);
   assert.doesNotMatch(seed, /\breading\b/);
 });
+
+test("feature availability is MongoDB-backed and V1 seed includes active feature records", () => {
+  const service = fs.readFileSync(path.join(root, "src", "modules", "features", "application", "FeaturesService.ts"), "utf8");
+  const repository = fs.readFileSync(path.join(root, "src", "modules", "features", "infrastructure", "MongoFeaturesRepository.ts"), "utf8");
+  const schema = fs.readFileSync(path.join(root, "src", "modules", "features", "schemas.ts"), "utf8");
+  const index = fs.readFileSync(path.join(root, "src", "infrastructure", "mongodb", "MongoIndexes.ts"), "utf8");
+  const seed = fs.readFileSync(path.join(root, "scripts", "seed-mongo.mjs"), "utf8");
+  assert.match(service, /repository\.listAll\(\)/);
+  assert.doesNotMatch(service, /V1_ENABLED_FEATURES/);
+  assert.match(repository, /collection<FeatureDocument>\("features"\)/);
+  assert.match(repository, /document\.isActive !== "boolean"/);
+  assert.match(schema, /isActive: z\.boolean\(\)/);
+  assert.match(index, /\["features", \{ key: 1 \}, \{ unique: true \}\]/);
+  assert.match(seed, /_id: 'spr-naamjaap-enabled',[\s\S]*?isActive: true/);
+  assert.match(seed, /_id: 'spr-meditation-enabled',[\s\S]*?isActive: true/);
+  assert.match(seed, /collectionName === 'features'/);
+});
