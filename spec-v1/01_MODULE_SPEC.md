@@ -21,6 +21,7 @@ HTTP -> Controller -> Application Service -> Repository Port -> Infrastructure A
 | notifications | reminder/device delivery | practice completion |
 | admin-content | V1 content authoring/publishing boundary | user-owned activity |
 | health | liveness/readiness | business logic |
+| features | server-owned feature availability in MongoDB | per-user practice preferences |
 | bootstrap | onboarding composition | user-owned activity |
 | home | Today composition | persistence ownership |
 
