@@ -11,8 +11,8 @@ const response = (description: string, schema?: Record<string, unknown>, example
   description,
   ...(schema ? json(schema, example) : {}),
 });
-const object = (properties: Record<string, unknown>, required: string[] = []) => ({
-  type: "object", properties, ...(required.length ? { required } : {}),
+const object = (properties: Record<string, unknown>, required: string[] = [], additionalProperties?: boolean) => ({
+  type: "object", properties, ...(required.length ? { required } : {}), ...(additionalProperties === undefined ? {} : { additionalProperties }),
 });
 const string = (description?: string, format?: string) => ({
   type: "string", ...(description ? { description } : {}), ...(format ? { format } : {}),
@@ -82,7 +82,7 @@ export const v1OpenApiDocument = {
         language: string(),
         timezone: string(),
         displayName: { type: "string", minLength: 1, maxLength: 100, description: "Optional; not collected by the V1 UI." },
-      }, ["installationId", "installationSecret", "platform"]),
+      }, ["installationId", "installationSecret", "platform"], false),
       AuthSession: object({
         token: string("Bearer token for authenticated requests."),
         expiresAt: string("Token expiration timestamp.", "date-time"),
