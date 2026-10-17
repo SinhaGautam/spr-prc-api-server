@@ -72,3 +72,33 @@ test("Naam Jap V1 does not expose or depend on a mantra catalogue", () => {
   assert.doesNotMatch(seed, /^\s*mantras:\s*\[/m);
   assert.doesNotMatch(indexes, /\["mantras"/);
 });
+
+
+test("registered profile and preference routes match the OpenAPI paths", () => {
+  const routes = fs.readFileSync(path.join(root, "src", "routes", "index.ts"), "utf8");
+  const userRoutes = fs.readFileSync(path.join(root, "src", "modules", "users", "routes.ts"), "utf8");
+  const preferenceRoutes = fs.readFileSync(path.join(root, "src", "modules", "preferences", "routes.ts"), "utf8");
+  const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
+
+  assert.match(routes, /v1Router\.use\("\/me", usersRouter\)/);
+  assert.match(routes, /v1Router\.use\("\/me", preferencesRouter\)/);
+  assert.match(userRoutes, /router\.get\("\/"/);
+  assert.match(userRoutes, /router\.put\("\/"/);
+  assert.match(preferenceRoutes, /router\.get\("\/preferences"/);
+  assert.match(preferenceRoutes, /router\.put\("\/preferences"/);
+  assert.match(openapi, /"\/me":/);
+  assert.match(openapi, /"\/me\/preferences":/);
+});
+
+test("OpenAPI documents concrete response contracts for bootstrap, home, and goals", () => {
+  const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
+  assert.match(openapi, /BootstrapResponse: object/);
+  assert.match(openapi, /HomeTodayResponse: object/);
+  assert.match(openapi, /DailyGoals: object/);
+  assert.match(openapi, /"\/bootstrap":[\s\S]*?\$ref: "#\/components\/schemas\/BootstrapResponse"/);
+  assert.match(openapi, /"\/home\/today":[\s\S]*?\$ref: "#\/components\/schemas\/HomeTodayResponse"/);
+  assert.match(openapi, /"\/goals\/today":[\s\S]*?\$ref: "#\/components\/schemas\/DailyGoals"/);
+  assert.match(openapi, /"\/progress\/today":[\s\S]*?\$ref: "#\/components\/schemas\/ProgressToday"/);
+  assert.match(openapi, /spr-reading-enabled", isActive: false/);
+  assert.match(openapi, /spr-song-enabled", isActive: false/);
+});
