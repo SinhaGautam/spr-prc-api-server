@@ -7,11 +7,10 @@ let client: MongoClient | null = null;
 let database: Db | null = null;
 
 export async function connectDatabase(): Promise<void> {
+  if (database) return;
   if (!E.MONGO_DB_URI) {
-    logger.warn("MongoDB is not configured; running without database connectivity");
-    return;
+    throw new Error("MONGO_DB_URI is required; refusing to start without MongoDB persistence");
   }
-  if (client && database) return;
 
   client = new MongoClient(E.MONGO_DB_URI, {
     serverSelectionTimeoutMS: 5000,
@@ -19,13 +18,23 @@ export async function connectDatabase(): Promise<void> {
     minPoolSize: 1,
   });
 
-  await client.connect();
-  database = client.db(E.MONGO_DB_NAME);
-  await ensureDatabaseIndexes(database);
-  logger.info({ database: E.MONGO_DB_NAME }, "MongoDB connection established");
+  try {
+    await client.connect();
+    database = client.db(E.MONGO_DB_NAME);
+    await ensureDatabaseIndexes(database);
+    logger.info({ database: E.MONGO_DB_NAME }, "MongoDB connection established");
+  } catch (error) {
+    await client.close().catch(() => undefined);
+    client = null;
+    database = null;
+    throw error;
+  }
 }
 
-export function getDatabase(): Db | null {
+export function getDatabase(): Db {
+  if (!database) {
+    throw new Error("MongoDB is not connected; call connectDatabase() before accessing repositories");
+  }
   return database;
 }
 
