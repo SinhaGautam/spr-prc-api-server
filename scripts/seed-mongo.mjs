@@ -188,6 +188,15 @@ try {
     if (count === 0) {
       await collection.insertMany(seed[collectionName]);
       console.log(`Seeded ${collectionName}: ${seed[collectionName].length} documents`);
+    } else if (collectionName === 'features') {
+      for (const document of seed.features) {
+        await collection.updateOne(
+          { key: document.key },
+          { $setOnInsert: document },
+          { upsert: true },
+        );
+      }
+      console.log('Ensured V1 feature records exist; existing feature activation values were preserved');
     } else {
       console.log(`Collection ${collectionName} already has ${count} documents; skipped seeding`);
     }
