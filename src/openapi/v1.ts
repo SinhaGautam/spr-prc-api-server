@@ -53,6 +53,7 @@ export const v1OpenApiDocument = {
     { name: "Authentication", description: "Create and revoke user sessions." },
     { name: "Onboarding", description: "Public onboarding catalog." },
     { name: "Home", description: "Authenticated daily overview." },
+    { name: "Configuration", description: "Feature availability configuration." },
     { name: "Profile", description: "User profile and preferences." },
     { name: "Naam Jap", description: "Naam Jap counting practice sessions." },
     { name: "Meditation", description: "Meditation presets and practice sessions." },
@@ -86,6 +87,10 @@ export const v1OpenApiDocument = {
         token: string("Bearer token for authenticated requests."),
         expiresAt: string("Token expiration timestamp.", "date-time"),
       }, ["token", "expiresAt"]),
+      BootstrapResponse: object({ traditions: { type: "array", items: object({ id: string(), key: string(), name: string() }, ["id", "key", "name"]) }, focuses: { type: "array", items: object({ id: string(), key: string(), name: string(), traditionIds: { type: "array", items: string() } }, ["id", "key", "name", "traditionIds"]) }, practices: { type: "array", items: { type: "string", enum: ["naam_jap", "meditation"] } }, meditationPresets: { type: "array", items: object({ id: string(), key: string(), durationMinutes: number() }, ["id", "key", "durationMinutes"]) }, languages: { type: "array", items: string() }, reminderDefaults: { $ref: "#/components/schemas/Reminder" } }, ["traditions", "focuses", "practices", "meditationPresets", "languages", "reminderDefaults"]),
+      HomeTodayResponse: object({ greeting: string(), dailyGoals: { type: "array", items: object({ practice: { type: "string", enum: ["naam_jap", "meditation"] }, targetLabel: string(), progress: { type: "number", minimum: 0 }, complete: bool }, ["practice", "targetLabel", "progress", "complete"]) }, meditationPreset: { oneOf: [{ $ref: "#/components/schemas/MeditationPreset" }, { type: "null" }] } }, ["greeting", "dailyGoals", "meditationPreset"]),
+      MeditationPreset: object({ id: string(), key: string(), durationMinutes: number() }, ["id", "durationMinutes"]),
+      DailyGoals: object({ date: string(), enabledPractices: { type: "array", items: { type: "string", enum: ["naam_jap", "meditation"] } }, goals: { type: "array", items: object({ practice: { type: "string", enum: ["naam_jap", "meditation"] }, target: string(), progress: { type: "number", minimum: 0 }, complete: bool }, ["practice", "target", "progress", "complete"]) }, allComplete: bool }, ["date", "enabledPractices", "goals", "allComplete"]),
       User: object({
         id: string(), username: string(), displayName: string(), provider: string(),
         status: { type: "string", enum: ["active", "inactive", "suspended"] },
