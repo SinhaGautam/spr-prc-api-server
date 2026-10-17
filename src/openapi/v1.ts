@@ -138,7 +138,7 @@ export const v1OpenApiDocument = {
       NaamJapSession: object({
         id: string(), userId: string(), targetRepetitions: number(), completedRepetitions: number(),
         startedAt: string(undefined, "date-time"), durationSeconds: number(), completed: bool,
-        clientSessionId: string(), createdAt: string(undefined, "date-time"),
+        clientSessionId: string(), createdAt: string(undefined, "date-time"), mantraId: string("Legacy historical snapshot only; not accepted on new sessions."), mantraTextSnapshot: string("Legacy historical snapshot only; not accepted on new sessions."),
         endedAt: string(undefined, "date-time"), idempotent: bool,
       }, ["id", "userId", "targetRepetitions", "completedRepetitions", "startedAt", "durationSeconds", "completed", "clientSessionId", "createdAt"]),
       MeditationSessionRequest: object({
