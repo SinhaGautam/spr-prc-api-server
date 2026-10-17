@@ -16,27 +16,24 @@ export class NaamJapService extends BaseApiService {
     private readonly featureAvailability: FeatureAvailabilityService,
   ) { super(); }
 
+  isEnabled(): Promise<boolean> { return this.featureAvailability.isActive(FEATURE_KEY); }
+
   async listMantras() {
     return this.execute("naamJap.listMantras", async () => {
       await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
-      return {
-        items: (await this.repository.listMantras()).map((item) => ({ id: item._id, name: item.name, text: item.text, language: item.language })),
-      };
+      return { items: (await this.repository.listMantras()).map((item) => ({ id: item._id, name: item.name, text: item.text, language: item.language })) };
     });
   }
 
   async createSession(userId: string, request: CreateNaamJapSessionRequest) {
     return this.execute("naamJap.createSession", async () => {
-      // Preserve idempotent retries for sessions that were already accepted.
       const existing = await this.repository.findByClientSessionId(userId, request.clientSessionId);
       if (existing) return { session: this.toResponse(existing), idempotent: true };
       await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
       if (request.completedRepetitions > request.targetRepetitions) throw new ConflictError("Completed repetitions cannot exceed target repetitions");
-
       const mantras = await this.repository.listMantras();
       const mantra = request.mantraId ? mantras.find((item) => item._id === request.mantraId) : undefined;
       if (request.mantraId && !mantra) throw new NotFoundError("Mantra not found");
-
       const session = new NaamJapSessionEntity(
         randomUUID(), userId, request.targetRepetitions, request.completedRepetitions,
         new Date(request.startedAt), request.durationSeconds,
@@ -51,9 +48,7 @@ export class NaamJapService extends BaseApiService {
   }
 
   async listSessions(userId: string) {
-    return this.execute("naamJap.listSessions", async () => ({
-      items: (await this.repository.listSessions(userId)).map((item) => this.toResponse(item)),
-    }), { userId });
+    return this.execute("naamJap.listSessions", async () => ({ items: (await this.repository.listSessions(userId)).map((item) => this.toResponse(item)) }), { userId });
   }
 
   private toResponse(session: NaamJapSessionEntity) {
