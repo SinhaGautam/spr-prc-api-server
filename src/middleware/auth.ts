@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AuthenticationError, AuthorizationError } from "../lib/errors";
-import { sessionRepository } from "../modules/auth";
+import { sessionRepository } from "../modules/auth/repositories";
 
 export interface AuthenticatedPrincipal {
   userId: string;
