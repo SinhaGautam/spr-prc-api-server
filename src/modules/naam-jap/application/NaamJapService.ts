@@ -18,27 +18,17 @@ export class NaamJapService extends BaseApiService {
 
   isEnabled(): Promise<boolean> { return this.featureAvailability.isActive(FEATURE_KEY); }
 
-  async listMantras() {
-    return this.execute("naamJap.listMantras", async () => {
-      await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
-      return { items: (await this.repository.listMantras()).map((item) => ({ id: item._id, name: item.name, text: item.text, language: item.language })) };
-    });
-  }
-
   async createSession(userId: string, request: CreateNaamJapSessionRequest) {
     return this.execute("naamJap.createSession", async () => {
       const existing = await this.repository.findByClientSessionId(userId, request.clientSessionId);
       if (existing) return { session: this.toResponse(existing), idempotent: true };
       await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
       if (request.completedRepetitions > request.targetRepetitions) throw new ConflictError("Completed repetitions cannot exceed target repetitions");
-      const mantras = await this.repository.listMantras();
-      const mantra = request.mantraId ? mantras.find((item) => item._id === request.mantraId) : undefined;
-      if (request.mantraId && !mantra) throw new NotFoundError("Mantra not found");
       const session = new NaamJapSessionEntity(
         randomUUID(), userId, request.targetRepetitions, request.completedRepetitions,
         new Date(request.startedAt), request.durationSeconds,
         request.completed || request.completedRepetitions >= request.targetRepetitions,
-        request.clientSessionId, request.mantraId, request.mantraText ?? mantra?.text,
+        request.clientSessionId, undefined, undefined,
         request.endedAt ? new Date(request.endedAt) : undefined,
       );
       const saved = await this.repository.createSession(session);
@@ -57,7 +47,6 @@ export class NaamJapService extends BaseApiService {
       completedRepetitions: session.completedRepetitions, startedAt: session.startedAt.toISOString(),
       durationSeconds: session.durationSeconds, completed: session.completed,
       clientSessionId: session.clientSessionId, createdAt: session.createdAt.toISOString(),
-      mantraId: session.mantraId, mantraTextSnapshot: session.mantraTextSnapshot,
       endedAt: session.endedAt?.toISOString(),
     };
   }
