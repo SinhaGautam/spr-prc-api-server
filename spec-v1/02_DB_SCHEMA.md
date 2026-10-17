@@ -92,11 +92,8 @@ Retained from V1.
 ### `tags`
 Retained only where needed for V1-supported content.
 
-### `mantras`
-Retain V1 curated mantra model.
-
 ### `naam_jap_sessions`
-Retain V1 session model. Unique: `(userId, clientSessionId)`. Indexes: `(userId, startedAt desc)`, `(userId, endedAt desc)`.
+Retain V1 session model. New sessions store repetition/timing results only and do not reference a mantra catalogue. Historical documents may retain `mantraId` and `mantraTextSnapshot`; these legacy snapshot fields remain readable but are not required for new sessions. Unique: `(userId, clientSessionId)`. Index: `(userId, startedAt desc)`.
 
 ### `meditation_presets`
 Retain V1 preset model.
@@ -134,7 +131,7 @@ Unique: `(userId, localDate)`.
 Indexes: `(userId, localDate desc)`, `(userId, dayCompleted, localDate desc)`.
 
 ### `media_assets`
-Retain only for approved mantra/meditation media. No song media.
+Retain only for approved meditation media. No song media.
 
 ### `device_registrations`
 Retain from V1.
