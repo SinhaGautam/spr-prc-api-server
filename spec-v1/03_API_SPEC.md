@@ -35,6 +35,7 @@ Request:
 - `displayName` is optional for backward-compatible contract evolution, but the V1 UI does not ask for or send it. The backend generates a stable, non-authenticating username such as `seeker-7A91B2C4`.
 - First request creates an `installations` record and an anonymous `users` record. A repeat request must prove possession of the installation secret and resolves the same user.
 - A session bearer token is generated with a cryptographically secure random generator. Only its SHA-256 hash is persisted.
+- The client must not attach an old/expired Bearer token to this bootstrap request; otherwise the global authentication middleware may reject the request before bootstrap runs.
 - Access session expires after 15 minutes. The client may call this endpoint again using the installation credentials to establish a new session.
 - Never log the installation secret or bearer token.
 - On the first successful session bootstrap, the client may call `POST /devices` only after it has a push-provider token. That endpoint is for notification delivery, not authentication.
