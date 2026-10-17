@@ -32,7 +32,7 @@ test("anonymous installation session is stable, revocable, and does not require 
   });
   assert.equal(firstResponse.status, 201);
   const first = await firstResponse.json();
-  assert.match(first.user.username, /^seeker-[A-F0-9]{8}$/);
+  assert.match(first.user.username, /^seeker-[A-F0-9]{16}$/);
   assert.equal(Object.hasOwn(first.user, "displayName"), false);
   assert.equal(first.installation.installationId, installationId);
   assert.ok(Date.parse(first.session.expiresAt) > Date.now());
