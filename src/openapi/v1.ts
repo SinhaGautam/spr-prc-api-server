@@ -281,7 +281,7 @@ export const v1OpenApiDocument = {
       get: { tags: ["Goals & Progress"], summary: "Get todays goals", operationId: "getTodayGoals", responses: { "200": response("Daily goals.", { $ref: "#/components/schemas/DailyGoals" }, { date: "2026-10-17", enabledPractices: ["naam_jap", "meditation"], goals: [{ practice: "naam_jap", target: "108 repetitions", progress: 0, complete: false }, { practice: "meditation", target: "10 minutes", progress: 0, complete: false }], allComplete: false }), ...standardErrors } },
     },
     "/progress/today": {
-      get: { tags: ["Goals & Progress"], summary: "Get todays goals", operationId: "getTodayGoals", responses: { "200": response("Daily goals.", { $ref: "#/components/schemas/DailyGoals" }, { date: "2026-10-17", enabledPractices: ["naam_jap", "meditation"], goals: [{ practice: "naam_jap", target: "108 repetitions", progress: 0, complete: false }, { practice: "meditation", target: "10 minutes", progress: 0, complete: false }], allComplete: false }), ...standardErrors } },
+      get: { tags: ["Goals & Progress"], summary: "Get todays progress", operationId: "getTodayProgress", responses: { "200": response("Todays practice progress.", { $ref: "#/components/schemas/ProgressToday" }, { date: "2026-10-17", completed: true, naam_jap: true, meditation: true }), ...standardErrors } },
     },
     "/progress/history": {
       get: {
