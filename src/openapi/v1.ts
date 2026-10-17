@@ -73,7 +73,7 @@ export const v1OpenApiDocument = {
       ApiError: errorSchema,
       CreateSessionRequest: object({
         installationId: string("Random UUID generated and persisted by the app.", "uuid"),
-        installationSecret: { type: "string", minLength: 32, maxLength: 256, description: "At least 32 random bytes encoded as base64url. Store only in platform secure storage." },
+        installationSecret: { type: "string", minLength: 43, maxLength: 256, description: "At least 32 random bytes encoded as base64url. Store only in platform secure storage." },
         platform: { type: "string", enum: ["android", "ios"], example: "android" },
         appVersion: string(),
         osVersion: string(),
