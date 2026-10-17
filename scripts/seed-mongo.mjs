@@ -10,6 +10,26 @@ const databaseName = process.env.MONGO_DB_NAME || process.env.MONGODB_DATABASE |
 
 const now = new Date();
 const seed = {
+  features: [
+    {
+      _id: 'spr-naamjaap-enabled',
+      key: 'spr-naamjaap-enabled',
+      isActive: true,
+      description: 'Enable Naam Jap practice',
+      sortOrder: 1,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      _id: 'spr-meditation-enabled',
+      key: 'spr-meditation-enabled',
+      isActive: true,
+      description: 'Enable meditation practice',
+      sortOrder: 2,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ],
   users: [
     {
       _id: 'user-1',
