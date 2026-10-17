@@ -238,7 +238,7 @@ export const v1OpenApiDocument = {
     "/home/today": {
       get: { tags: ["Home"], summary: "Today view", operationId: "getTodayView", responses: { "200": response("Today home view.", { $ref: "#/components/schemas/HomeTodayResponse" }, { greeting: "May your practice be gentle and steady.", dailyGoals: [{ practice: "naam_jap", targetLabel: "108 repetitions", progress: 0, complete: false }, { practice: "meditation", targetLabel: "10 minutes", progress: 0, complete: false }], meditationPreset: { id: "preset-10", key: "ten_minutes", durationMinutes: 10 } }), ...standardErrors } },
     },
-    "/me": {
+    "/user": {
       get: { tags: ["Profile"], summary: "Get user profile", operationId: "getProfile", responses: { "200": response("Current user's profile.", { $ref: "#/components/schemas/UserProfile" }, { id: "user-123", displayName: "Demo User", email: "demo@example.com", timezone: "Asia/Kolkata", language: "en", status: "active" }), ...standardErrors } },
       put: {
         tags: ["Profile"], summary: "Update user profile", operationId: "updateProfile",
@@ -246,7 +246,7 @@ export const v1OpenApiDocument = {
         responses: { "200": response("Profile updated.", { $ref: "#/components/schemas/UserProfile" }, { id: "user-123", displayName: "Demo User", email: "demo@example.com", timezone: "Asia/Kolkata", language: "en", status: "active" }), ...standardErrors },
       },
     },
-    "/me/preferences": {
+    "/preferences/preferences": {
       get: { tags: ["Profile"], summary: "Get preferences", operationId: "getPreferences", responses: { "200": response("Current preferences.", { $ref: "#/components/schemas/Preferences" }, { userId: "user-123", traditionId: "sanatan", primaryFocusId: "peace", enabledPractices: ["naam_jap", "meditation"], naamJapTarget: 108, meditationTargetMinutes: 10, reminder: { enabled: true, localTime: "07:00" } }), ...standardErrors } },
       put: {
         tags: ["Profile"], summary: "Update preferences", operationId: "updatePreferences",
