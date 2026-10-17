@@ -2,12 +2,12 @@ import { z } from "zod";
 
 export const createSessionRequestSchema = z.object({
   installationId: z.string().uuid(),
-  installationSecret: z.string().min(32).max(256),
+  installationSecret: z.string().min(43).max(256),
   platform: z.enum(["android", "ios"]),
   appVersion: z.string().trim().min(1).max(50).optional(),
   osVersion: z.string().trim().min(1).max(100).optional(),
   deviceModel: z.string().trim().min(1).max(100).optional(),
-  language: z.string().trim().min(2).max(35).optional(),
+  language: z.string().trim().min(2).max(10).optional(),
   timezone: z.string().trim().min(1).max(100).optional(),
   displayName: z.string().trim().min(1).max(100).optional(),
 }).strict();
