@@ -2,7 +2,7 @@ import { BaseApiService } from "../../../core/application/BaseApiService";
 import { NotFoundError } from "../../../lib/errors";
 import type { UpdateUserRequest } from "../contracts/UserRequest";
 import type { UserProfileResponse } from "../contracts/UserResponse";
-import type { UserEntity } from "../entities/UserEntity";
+import { UserEntity } from "../entities/UserEntity";
 import type { UserRepository } from "./UserRepository";
 
 export class UserService extends BaseApiService {
@@ -13,7 +13,7 @@ export class UserService extends BaseApiService {
   async getProfile(userId: string): Promise<UserProfileResponse> {
     return this.execute("users.getProfile", async () => {
       const user = await this.userRepository.findById(userId);
-      if (!user) throw new NotFoundError("User profile not found", { userId });
+      if (!user) throw new NotFoundError(`User profile not found ${ userId }`);
       return this.toProfileResponse(user);
     }, { userId });
   }
@@ -21,7 +21,7 @@ export class UserService extends BaseApiService {
   async updateProfile(userId: string, request: UpdateUserRequest): Promise<UserProfileResponse> {
     return this.execute("users.updateProfile", async () => {
       const existing = await this.userRepository.findById(userId);
-      if (!existing) throw new NotFoundError("User profile not found", { userId });
+      if (!existing) throw new NotFoundError(`User profile not found ${ userId }`);
 
       const updated = new UserEntity(
         existing._id,
