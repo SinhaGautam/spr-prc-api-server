@@ -13,7 +13,7 @@ Test first activity, accumulation, idempotency, exact day completion, and absenc
 Test first completed day, consecutive days, missed day, current incomplete day, timezone boundaries/changes, and duplicate submissions.
 
 ## Naam Jap
-Test negative count rejection, valid count, target reached/exceeded, duplicate clientSessionId, malformed dates, invalid duration, offline retry, mantra snapshot.
+Test negative count rejection, valid count, target reached/exceeded, duplicate clientSessionId, malformed dates, invalid duration, offline retry, and session creation without any mantra fields. Verify the mantra-list route is absent and Home does not query the mantra catalogue.
 
 ## Meditation
 Test supported/unsupported presets, completed/interrupted sessions, duplicate clientSessionId, actual duration aggregation, offline retry.
