@@ -33,7 +33,7 @@ Do not log tokens, credentials, password hashes, unnecessary personal data, or p
 Legacy Reading/Song/playback data must not be exposed by V1 mobile APIs. Temporary retention requires restricted migration/retention access outside the mobile API.
 
 ## Account deletion
-Cover profile, preferences, Naam Jap sessions, Meditation sessions, daily goals/progress, and device registrations. Handle legacy data according to approved migration policy.
+Cover profile, preferences, Naam Jap sessions, Meditation sessions, daily goals/progress, device registrations, all active sessions, and installation records associated with the user. Handle legacy data according to approved migration policy.
 
 ## Administration
 Admin content changes require auth, authorization, audit trail, and explicit publish/archive.
