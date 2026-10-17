@@ -13,12 +13,12 @@ export class MongoInstallationRepository implements InstallationRepository {
   }
 
   async create(installation: Installation): Promise<Installation> {
-    await this.db.collection<Installation>("installations").insertOne(installation as InstallationDocument);
+    await this.db.collection<InstallationDocument>("installations").insertOne(installation as InstallationDocument);
     return installation;
   }
 
   async update(installation: Installation): Promise<Installation> {
-    const result = await this.db.collection<Installation>("installations").updateOne(
+    const result = await this.db.collection<InstallationDocument>("installations").updateOne(
       { installationId: installation.installationId, userId: installation.userId },
       { $set: {
         platform: installation.platform,
