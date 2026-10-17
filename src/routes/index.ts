@@ -4,6 +4,7 @@ import bootstrapRouter from "../modules/bootstrap";
 import dailyPracticeRouter from "../modules/daily-practice";
 import healthRouter from "../modules/health";
 import homeRouter from "../modules/home";
+import featuresRouter from "../modules/features";
 import meditationRouter from "../modules/meditation";
 import naamJapRouter from "../modules/naam-jap";
 import notificationsRouter from "../modules/notifications";
@@ -16,6 +17,7 @@ const v1Router: IRouter = Router();
 
 v1Router.use("/auth", authRouter);
 v1Router.use("/bootstrap", bootstrapRouter);
+v1Router.use("/features", featuresRouter);
 v1Router.use("/home", homeRouter);
 v1Router.use("/me", usersRouter);
 v1Router.use("/me", preferencesRouter);
