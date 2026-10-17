@@ -10,12 +10,15 @@ export class MongoInstallationRepository implements InstallationRepository {
     return doc ?? null;
   }
 
-  async save(installation: Installation): Promise<Installation> {
-    await this.db.collection<Installation>("installations").updateOne(
-      { installationId: installation.installationId },
+  async create(installation: Installation): Promise<Installation> {
+    await this.db.collection<Installation>("installations").insertOne(installation);
+    return installation;
+  }
+
+  async update(installation: Installation): Promise<Installation> {
+    const result = await this.db.collection<Installation>("installations").updateOne(
+      { installationId: installation.installationId, userId: installation.userId },
       { $set: {
-        secretHash: installation.secretHash,
-        userId: installation.userId,
         platform: installation.platform,
         appVersion: installation.appVersion,
         osVersion: installation.osVersion,
@@ -24,9 +27,9 @@ export class MongoInstallationRepository implements InstallationRepository {
         timezone: installation.timezone,
         updatedAt: installation.updatedAt,
         lastSeenAt: installation.lastSeenAt,
-      }, $setOnInsert: { createdAt: installation.createdAt } },
-      { upsert: true },
+      } },
     );
+    if (result.matchedCount === 0) throw new Error("Installation was not found for update");
     return installation;
   }
 }
