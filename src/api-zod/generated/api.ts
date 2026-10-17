@@ -18,7 +18,7 @@ export const UserPreferencesRequest = zod.object({
   meditationTargetMinutes: zod.number().int().positive().max(180).optional(),
   reminder: zod.object({
     enabled: zod.boolean(),
-    localTime: zod.string().regex(/^([01]\\d|2[0-3]):[0-5]\\d$/).optional(),
+    localTime: zod.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
   }).optional(),
 });
 
