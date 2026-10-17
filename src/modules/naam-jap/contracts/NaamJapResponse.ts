@@ -1,4 +1,3 @@
-export interface MantraResponse { id: string; name: string; text: string; language: string; }
 export interface NaamJapSessionResponse {
   id: string;
   userId: string;
