@@ -5,7 +5,8 @@ export interface AuthSessionResponse {
 
 export interface AuthenticatedUserResponse {
   id: string;
-  displayName: string;
+  username: string;
+  displayName?: string;
   provider: string;
   status: "active" | "inactive" | "suspended";
   timezone: string;
@@ -15,4 +16,9 @@ export interface AuthenticatedUserResponse {
 export interface CreateSessionResponse {
   session: AuthSessionResponse;
   user: AuthenticatedUserResponse;
+  installation: {
+    installationId: string;
+    platform: "android" | "ios";
+    createdAt: string;
+  };
 }

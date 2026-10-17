@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AuthenticationError, AuthorizationError } from "../lib/errors";
-import { sessionRepository } from "../modules/auth/infrastructure/InMemorySessionRepository";
+import { sessionRepository } from "../modules/auth/repositories";
 
 export interface AuthenticatedPrincipal {
   userId: string;
@@ -9,27 +9,31 @@ export interface AuthenticatedPrincipal {
 }
 
 export async function authenticationMiddleware(req: Request, _res: Response, next: NextFunction): Promise<void> {
-  const authHeader = req.get("authorization");
-  if (!authHeader) {
-    req.user = undefined;
+  try {
+    const authHeader = req.get("authorization");
+    if (!authHeader) {
+      req.user = undefined;
+      next();
+      return;
+    }
+
+    const match = /^Bearer\s+([^\s]+)$/i.exec(authHeader);
+    if (!match) {
+      next(new AuthenticationError("Invalid authorization header"));
+      return;
+    }
+
+    const session = await sessionRepository.findByToken(match[1]);
+    if (!session) {
+      next(new AuthenticationError("Authentication failed"));
+      return;
+    }
+
+    req.user = { userId: session.userId, authProvider: "installation", roles: ["user"] };
     next();
-    return;
+  } catch (error) {
+    next(error);
   }
-
-  const [scheme, token] = authHeader.split(" ");
-  if (scheme !== "Bearer" || !token) {
-    next(new AuthenticationError("Invalid authorization header"));
-    return;
-  }
-
-  const session = await sessionRepository.findByToken(token);
-  if (!session) {
-    next(new AuthenticationError("Authentication failed"));
-    return;
-  }
-
-  req.user = { userId: session.userId, authProvider: "mock", roles: ["user"] };
-  next();
 }
 
 export function requireAuthentication(req: Request, _res: Response, next: NextFunction): void {

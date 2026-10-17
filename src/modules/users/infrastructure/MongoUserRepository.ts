@@ -16,6 +16,7 @@ function mapUser(doc: Document): UserEntity {
     typeof doc.email === "string" ? doc.email : undefined,
     doc.createdAt instanceof Date ? doc.createdAt : new Date(String(doc.createdAt)),
     doc.updatedAt instanceof Date ? doc.updatedAt : new Date(String(doc.updatedAt)),
+    typeof doc.username === "string" ? doc.username : undefined,
   );
 }
 

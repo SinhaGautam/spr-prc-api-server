@@ -7,9 +7,49 @@ Authentication derives current user from the authenticated principal. Never trus
 
 Every public endpoint has request/response models and Zod schemas, auth policy, error contract, trace/logging requirements, and tests.
 
-## Authentication
+## Authentication and anonymous installation lifecycle
+
 - POST /auth/session
 - DELETE /auth/session
+
+### POST /auth/session — create or resume an anonymous installation session
+
+Public bootstrap endpoint. The mobile client generates and securely stores a random UUID `installationId` and a cryptographically random `installationSecret` (at least 32 random bytes, encoded as base64url). Do not use hardware IDs, push tokens, or client-generated user IDs as credentials.
+
+Request:
+```json
+{
+  "installationId": "UUID",
+  "installationSecret": "base64url-secret",
+  "platform": "android",
+  "appVersion": "1.0.0",
+  "osVersion": "Android 16",
+  "deviceModel": "optional model family",
+  "language": "en",
+  "timezone": "Asia/Kolkata"
+}
+```
+
+- `installationId` and `installationSecret` are required; platform is required.
+- Device metadata fields are optional and treated as untrusted client claims.
+- `displayName` is optional for backward-compatible contract evolution, but the V1 UI does not ask for or send it. The backend generates a stable, non-authenticating username such as `seeker-7A91B2C4`.
+- First request creates an `installations` record and an anonymous `users` record. A repeat request must prove possession of the installation secret and resolves the same user.
+- A session bearer token is generated with a cryptographically secure random generator. Only its SHA-256 hash is persisted.
+- The client must not attach an old/expired Bearer token to this bootstrap request; otherwise the global authentication middleware may reject the request before bootstrap runs.
+- Access session expires after 15 minutes. The client may call this endpoint again using the installation credentials to establish a new session.
+- Never log the installation secret or bearer token.
+- On the first successful session bootstrap, the client may call `POST /devices` only after it has a push-provider token. That endpoint is for notification delivery, not authentication.
+- Repeated registration for an existing installation must not create another user. Enforce unique indexes on `installations.installationId` and `users(authProvider, authSubject)`; handle duplicate-key races safely.
+
+Response includes `session { token, expiresAt }`, `user { id, username, displayName?, provider, status, timezone, language }`, and safe installation metadata. Never return the installation secret hash or any stored credential hash.
+
+### DELETE /auth/session — revoke current session
+
+Requires a valid Bearer token. Revokes the current server-side session. It does not delete the user or installation. A client that retains the installation secret can create a new session; the UI must not label this action as “delete account”.
+
+### Reset local data button
+
+This is a client-side cache/data reset, not a backend account deletion endpoint. Before clearing local state, attempt to sync pending practice sessions and warn if unsynced data would be lost. Preserve the installation ID and installation secret so the same anonymous user can resume. Do not clear these credentials unless the user explicitly chooses “Start fresh”; starting fresh generates a new installation ID and secret and creates a separate anonymous identity.
 
 ## Bootstrap
 - GET /bootstrap

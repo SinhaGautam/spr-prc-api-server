@@ -9,6 +9,7 @@ export const updateUserRequestSchema = z.object({
 
 export const userProfileResponseSchema = z.object({
   id: z.string(),
+  username: z.string().optional(),
   displayName: z.string().optional(),
   email: z.string().optional(),
   timezone: z.string(),

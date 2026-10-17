@@ -45,7 +45,7 @@ export const v1OpenApiDocument = {
   info: {
     title: "Bhakti App API",
     version: "1.0.0",
-    description: "Version 1 API for Naam Jap and Meditation. Use Authorize to set a Bearer session token. Create a session with POST /auth/session first; copy session.token from the response and authorize as a JWT/Bearer token. The mock provider is intended for development/test flows.",
+    description: "Version 1 API for Naam Jap and Meditation. Create or resume an anonymous installation session with POST /auth/session using a client-generated installation UUID and secret. Store installation credentials in platform secure storage; use the returned opaque Bearer token for protected requests.",
     contact: { name: "Bhakti API" },
   },
   servers: [{ url: "/api/v1", description: "Current application server" }],
@@ -65,27 +65,42 @@ export const v1OpenApiDocument = {
       Bearer: {
         type: "http",
         scheme: "bearer",
-        bearerFormat: "JWT",
+        bearerFormat: "opaque token",
         description: "Paste the session token only; Swagger UI adds the 'Bearer ' prefix automatically. Obtain a token from POST /auth/session.",
       },
     },
     schemas: {
       ApiError: errorSchema,
       CreateSessionRequest: object({
-        provider: { type: "string", enum: ["mock", "apple", "google"], example: "mock" },
-        subject: { type: "string", minLength: 1, maxLength: 255, example: "local-user-001" },
-        displayName: { type: "string", minLength: 1, maxLength: 100, example: "Demo User" },
-      }, ["provider", "subject"]),
+        installationId: string("Random UUID generated and persisted by the app.", "uuid"),
+        installationSecret: { type: "string", minLength: 43, maxLength: 256, description: "At least 32 random bytes encoded as base64url. Store only in platform secure storage." },
+        platform: { type: "string", enum: ["android", "ios"], example: "android" },
+        appVersion: string(),
+        osVersion: string(),
+        deviceModel: string(),
+        language: string(),
+        timezone: string(),
+        displayName: { type: "string", minLength: 1, maxLength: 100, description: "Optional; not collected by the V1 UI." },
+      }, ["installationId", "installationSecret", "platform"]),
       AuthSession: object({
         token: string("Bearer token for authenticated requests."),
         expiresAt: string("Token expiration timestamp.", "date-time"),
       }, ["token", "expiresAt"]),
       User: object({
-        id: string(), displayName: string(), provider: string(),
+        id: string(), username: string(), displayName: string(), provider: string(),
         status: { type: "string", enum: ["active", "inactive", "suspended"] },
         timezone: string(), language: string(),
-      }, ["id", "displayName", "provider", "status", "timezone", "language"]),
-      AuthResponse: object({ session: { $ref: "#/components/schemas/AuthSession" }, user: { $ref: "#/components/schemas/User" } }, ["session", "user"]),
+      }, ["id", "username", "provider", "status", "timezone", "language"]),
+      Installation: object({
+        installationId: string(undefined, "uuid"),
+        platform: { type: "string", enum: ["android", "ios"] },
+        createdAt: string(undefined, "date-time"),
+      }, ["installationId", "platform", "createdAt"]),
+      AuthResponse: object({
+        session: { $ref: "#/components/schemas/AuthSession" },
+        user: { $ref: "#/components/schemas/User" },
+        installation: { $ref: "#/components/schemas/Installation" },
+      }, ["session", "user", "installation"]),
       UpdateProfileRequest: object({
         displayName: { type: "string", minLength: 1, maxLength: 100, example: "Demo User" },
         email: { type: "string", format: "email", example: "demo@example.com" },
@@ -93,7 +108,7 @@ export const v1OpenApiDocument = {
         language: { type: "string", minLength: 2, maxLength: 10, example: "en" },
       }, ["timezone", "language"]),
       UserProfile: object({
-        id: string(), displayName: string(), email: string(), timezone: string(), language: string(),
+        id: string(), username: string(), displayName: string(), email: string(), timezone: string(), language: string(),
         status: { type: "string", enum: ["active", "inactive", "suspended"] },
       }, ["id", "timezone", "language", "status"]),
       Reminder: object({ enabled: bool, localTime: { type: "string", pattern: "^([01]\\d|2[0-3]):[0-5]\\d$", example: "07:00" } }, ["enabled"]),
@@ -166,11 +181,11 @@ export const v1OpenApiDocument = {
     "/auth/session": {
       post: {
         tags: ["Authentication"], summary: "Create session", operationId: "createSession",
-        description: "Creates or resolves a user session. Copy response.session.token and click Authorize to test protected endpoints.",
+        description: "Creates or resumes an anonymous user tied to an installation. The client must generate and securely store installationId (UUID) and installationSecret (32+ random bytes encoded as base64url). Do not attach an old Bearer token to this bootstrap request. Repeating the request with the same secret resumes the same user. The returned access token expires in 15 minutes.",
         ...publicOperation,
-        requestBody: { required: true, ...json({ $ref: "#/components/schemas/CreateSessionRequest" }, { provider: "mock", subject: "local-user-001", displayName: "Demo User" }) },
+        requestBody: { required: true, ...json({ $ref: "#/components/schemas/CreateSessionRequest" }, { installationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", installationSecret: "replace-with-32-plus-random-bytes-base64url", platform: "android", appVersion: "1.0.0", language: "en", timezone: "Asia/Kolkata" }) },
         responses: {
-          "201": response("Session created.", { $ref: "#/components/schemas/AuthResponse" }, { session: { token: "eyJhbGciOiJIUzI1NiJ9.example.signature", expiresAt: "2026-10-18T06:00:00.000Z" }, user: { id: "user-123", displayName: "Demo User", provider: "mock", status: "active", timezone: "Asia/Kolkata", language: "en" } }),
+          "201": response("Session created.", { $ref: "#/components/schemas/AuthResponse" }, { session: { token: "opaque-random-token", expiresAt: "2026-10-17T06:15:00.000Z" }, user: { id: "user-123", username: "seeker-7A91B2C4D5E6F7A8", provider: "installation", status: "active", timezone: "Asia/Kolkata", language: "en" }, installation: { installationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", platform: "android", createdAt: "2026-10-17T06:00:00.000Z" } }),
           ...standardErrors,
         },
       },
