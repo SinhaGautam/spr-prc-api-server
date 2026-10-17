@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { AuthSession } from "../entities/AuthSession";
+import { AuthSession } from "../entities/AuthSession";
 import type { SessionRepository } from "../application/SessionRepository";
 
 function hashToken(token: string): string {
@@ -28,11 +28,14 @@ export class InMemorySessionRepository implements SessionRepository {
     const hash = hashToken(token);
     const session = this.sessions.get(hash);
     if (session) {
-      this.sessions.set(hash, new (session.constructor as typeof import("../entities/AuthSession").AuthSession)(
-        session.tokenHash, session.userId, session.installationId, session.expiresAt, session.createdAt, new Date(),
+      this.sessions.set(hash, new AuthSession(
+        session.tokenHash,
+        session.userId,
+        session.installationId,
+        session.expiresAt,
+        session.createdAt,
+        new Date(),
       ));
     }
   }
 }
-
-export const sessionRepository = new InMemorySessionRepository();
