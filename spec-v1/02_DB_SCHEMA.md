@@ -10,7 +10,7 @@
 ## Active V1 collections
 
 ### `features`
-The `features` collection is the source of truth for server-owned feature availability. Every feature flag supported by this release has exactly one record:
+The `features` collection is the source of truth for server-owned feature availability. Each configured feature flag has exactly one record. Forward-looking Reading and Song flags may be present as inactive metadata, but this does not add their modules, data collections, or endpoints to V1:
 
 ```json
 {
