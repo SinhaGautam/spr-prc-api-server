@@ -5,15 +5,20 @@ import type { CreateMeditationSessionRequest } from "../contracts/MeditationRequ
 import type { MeditationRepository } from "./MeditationRepository";
 import { MeditationSessionEntity } from "../entities/MeditationSessionEntity";
 import type { PracticeCompletionPort } from "../../daily-practice/application/PracticeCompletionPort";
+import type { FeatureAvailabilityService } from "../../features/application/FeatureAvailabilityService";
+
+const FEATURE_KEY = "spr-meditation-enabled";
 
 export class MeditationService extends BaseApiService {
   constructor(
     private readonly repository: MeditationRepository,
     private readonly completionPort: PracticeCompletionPort,
+    private readonly featureAvailability: FeatureAvailabilityService,
   ) { super(); }
 
   async listPresets() {
     return this.execute("meditation.listPresets", async () => {
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Meditation");
       const presets = await this.repository.listPresets();
       return { items: presets.map((item) => ({ id: String(item._id), key: item.key, durationMinutes: item.durationMinutes })) };
     });
@@ -21,8 +26,10 @@ export class MeditationService extends BaseApiService {
 
   async createSession(userId: string, request: CreateMeditationSessionRequest) {
     return this.execute("meditation.createSession", async () => {
+      // Preserve idempotent retries for sessions that were already accepted.
       const existing = await this.repository.findSessionByClientSessionId(userId, request.clientSessionId);
       if (existing) return { session: this.toResponse(existing), idempotent: true };
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Meditation");
       if (request.actualSeconds > request.plannedMinutes * 60) throw new ConflictError("Meditation duration exceeds planned duration");
 
       const session = new MeditationSessionEntity(
