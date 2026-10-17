@@ -23,7 +23,7 @@ function safeHashEquals(left: string, right: string): boolean {
 }
 
 function generatedUsername(): string {
-  return `seeker-${randomBytes(4).toString("hex").toUpperCase()}`;
+  return `seeker-${randomBytes(8).toString("hex").toUpperCase()}`;
 }
 
 function validTimezone(timezone: string | undefined): string {
