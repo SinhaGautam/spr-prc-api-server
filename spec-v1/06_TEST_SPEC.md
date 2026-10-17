@@ -24,7 +24,7 @@ Test supported/unsupported presets, completed/interrupted sessions, duplicate cl
 - preferences schema rejects Reading/Song
 - daily goal/progress models have no Reading/Song fields
 - repository exports contain no Reading/Song repositories
-- seed data contains no reading/song/playback/favorite records
+- seed data contains no Reading/Song/playback/favorite data records or collections; feature flags `spr-reading-enabled` and `spr-song-enabled` are allowed only with `isActive: false`
 - no legacy feature module is imported by V1
 
 ## Authentication and installation lifecycle
@@ -45,7 +45,7 @@ Test supported/unsupported presets, completed/interrupted sessions, duplicate cl
 - `GET /features` lists both active and inactive MongoDB records, ordered deterministically.
 - Feature service reads through the MongoDB repository and contains no hard-coded fallback list.
 - Empty feature collection returns an empty list; MongoDB failures are surfaced through the standard error handler.
-- Seed data creates the two V1 feature documents as active when the collection is empty.
+- Seed data ensures Naam Jap and Meditation feature documents are active by default, and Reading and Song feature flags are inactive when first inserted; existing activation values are preserved.
 
 ## API integration
 Every V1 endpoint: success, validation failure, auth failure, authorization failure where relevant, not found, duplicate/idempotency, dependency failure where meaningful. Also assert removed paths are not registered.
