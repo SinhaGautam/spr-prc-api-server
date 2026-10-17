@@ -47,6 +47,8 @@ export class NaamJapService extends BaseApiService {
       completedRepetitions: session.completedRepetitions, startedAt: session.startedAt.toISOString(),
       durationSeconds: session.durationSeconds, completed: session.completed,
       clientSessionId: session.clientSessionId, createdAt: session.createdAt.toISOString(),
+      ...(session.mantraId ? { mantraId: session.mantraId } : {}),
+      ...(session.mantraTextSnapshot ? { mantraTextSnapshot: session.mantraTextSnapshot } : {}),
       endedAt: session.endedAt?.toISOString(),
     };
   }
