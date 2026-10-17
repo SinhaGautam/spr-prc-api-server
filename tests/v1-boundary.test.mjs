@@ -93,10 +93,11 @@ test("registered profile and preference routes match the OpenAPI paths", () => {
 test("OpenAPI documents concrete response contracts for bootstrap, home, and goals", () => {
   const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
   assert.match(openapi, /BootstrapResponse: object/);
-  assert.match(openapi, /"\/preferences\/preferences":/);
+  assert.match(openapi, /HomeTodayResponse: object/);
   assert.match(openapi, /DailyGoals: object/);
+  assert.match(openapi, /tags: \{ type: "array", items: object\(\{ id: string\(\), key: string\(\), name: string\(\), type: string\(\) \}/);
   assert.match(openapi, /"\/bootstrap":[\s\S]*?\$ref: "#\/components\/schemas\/BootstrapResponse"/);
-  assert.match(openapi, /"\/preferences\/preferences":/);
+  assert.match(openapi, /"\/home\/today":[\s\S]*?\$ref: "#\/components\/schemas\/HomeTodayResponse"/);
   assert.match(openapi, /"\/goals\/today":[\s\S]*?\$ref: "#\/components\/schemas\/DailyGoals"/);
   assert.match(openapi, /"\/progress\/today":[\s\S]*?\$ref: "#\/components\/schemas\/ProgressToday"/);
   assert.match(openapi, /spr-reading-enabled", isActive: false/);
