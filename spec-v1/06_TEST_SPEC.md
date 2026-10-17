@@ -40,6 +40,13 @@ Test supported/unsupported presets, completed/interrupted sessions, duplicate cl
 - Device metadata is optional/untrusted; push tokens are not used for authentication.
 - Reset-local-data semantics preserve installation credentials; “start fresh” generates a new installation identity and does not delete server data.
 
+## Feature availability
+- `features` collection uses canonical stable keys and required boolean `isActive`.
+- `GET /features` lists both active and inactive MongoDB records, ordered deterministically.
+- Feature service reads through the MongoDB repository and contains no hard-coded fallback list.
+- Empty feature collection returns an empty list; MongoDB failures are surfaced through the standard error handler.
+- Seed data creates the two V1 feature documents as active when the collection is empty.
+
 ## API integration
 Every V1 endpoint: success, validation failure, auth failure, authorization failure where relevant, not found, duplicate/idempotency, dependency failure where meaningful. Also assert removed paths are not registered.
 
