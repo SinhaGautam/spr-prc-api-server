@@ -5,7 +5,7 @@ import { NaamJapController } from "./controllers/NaamJapController";
 
 export function createNaamJapRoutes(controller: NaamJapController): IRouter {
   const router = Router();
-  router.post("/naam-jap/sessions", requireAuthentication, asyncHandler((req, res) => controller.createSession(req, res)));
-  router.get("/naam-jap/sessions", requireAuthentication, asyncHandler((req, res) => controller.listSessions(req, res)));
+  router.post("/sessions", requireAuthentication, asyncHandler((req, res) => controller.createSession(req, res)));
+  router.get("/sessions", requireAuthentication, asyncHandler((req, res) => controller.listSessions(req, res)));
   return router;
 }

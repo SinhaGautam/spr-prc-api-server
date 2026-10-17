@@ -5,6 +5,6 @@ import { HomeController } from "./controllers/HomeController";
 
 export function createHomeRoutes(controller: HomeController): IRouter {
   const router = Router();
-  router.get("/today", requireAuthentication, asyncHandler((req, res) => controller.getToday(req, res)));
+  router.get("/", requireAuthentication, asyncHandler((req, res) => controller.getData(req, res)));
   return router;
 }

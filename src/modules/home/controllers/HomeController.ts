@@ -4,7 +4,7 @@ import type { HomeService } from "../application/HomeService";
 
 export class HomeController extends BaseController {
   constructor(private readonly service: HomeService) { super(); }
-  async getToday(req: Request, res: Response): Promise<void> {
-    this.ok(res, await this.service.getTodayView(req.user!.userId));
+  async getData(req: Request, res: Response): Promise<void> {
+    this.ok(res, await this.service.getDataView(req.user!.userId));
   }
 }

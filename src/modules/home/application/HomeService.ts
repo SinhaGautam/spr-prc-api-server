@@ -10,8 +10,8 @@ export class HomeService extends BaseApiService {
     private readonly naamJapService: NaamJapService,
   ) { super(); }
 
-  async getTodayView(userId: string) {
-    return this.execute("home.getTodayView", async () => {
+  async getDataView(userId: string) {
+    return this.execute("home.getDataView", async () => {
       const [goals, meditationEnabled, naamJapEnabled] = await Promise.all([
         this.dailyPracticeService.getGoalsToday(userId),
         this.meditationService.isEnabled(),
