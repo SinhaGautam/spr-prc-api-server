@@ -1,5 +1,6 @@
 export interface UserProfileResponse {
   id: string;
+  username?: string;
   displayName?: string;
   email?: string;
   timezone: string;
