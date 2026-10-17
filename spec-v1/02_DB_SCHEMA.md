@@ -141,7 +141,7 @@ Before production deployment, choose and document one:
 The chosen policy must be verified by migration/retention tests.
 
 ## Referential rules
-- user deletion covers all active V1 user-owned data
+- user deletion covers all active V1 user-owned data, sessions, and the installation record(s) associated with the user
 - archived V1 content is not public
 - historical Naam Jap snapshots retain sufficient immutable data
 - legacy Reading/Song data is not exposed by V1 APIs
