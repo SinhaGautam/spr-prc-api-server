@@ -24,6 +24,9 @@ export class MongoFeaturesRepository implements FeaturesRepository {
       if (typeof document.key !== "string" || typeof document.isActive !== "boolean") {
         throw new Error("Invalid feature document: key and isActive are required");
       }
+      if (!/^spr-[a-z]+(?:-[a-z]+)*-enabled$/.test(document.key)) {
+        throw new Error("Invalid feature document: key must use the canonical spr-{feature}-enabled format");
+      }
 
       return {
         id: String(document._id),
