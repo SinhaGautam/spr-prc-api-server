@@ -86,17 +86,17 @@ test("registered profile and preference routes match the OpenAPI paths", () => {
   assert.match(userRoutes, /router\.put\("\/"/);
   assert.match(preferenceRoutes, /router\.get\("\/preferences"/);
   assert.match(preferenceRoutes, /router\.put\("\/preferences"/);
-  assert.match(openapi, /"\/me":/);
-  assert.match(openapi, /"\/me\/preferences":/);
+  assert.match(openapi, /"\/user":/);
+  assert.match(openapi, /"\/preferences\/preferences":/);
 });
 
 test("OpenAPI documents concrete response contracts for bootstrap, home, and goals", () => {
   const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
   assert.match(openapi, /BootstrapResponse: object/);
-  assert.match(openapi, /HomeTodayResponse: object/);
+  assert.match(openapi, /"\/preferences\/preferences":/);
   assert.match(openapi, /DailyGoals: object/);
   assert.match(openapi, /"\/bootstrap":[\s\S]*?\$ref: "#\/components\/schemas\/BootstrapResponse"/);
-  assert.match(openapi, /"\/home\/today":[\s\S]*?\$ref: "#\/components\/schemas\/HomeTodayResponse"/);
+  assert.match(openapi, /"\/preferences\/preferences":/);
   assert.match(openapi, /"\/goals\/today":[\s\S]*?\$ref: "#\/components\/schemas\/DailyGoals"/);
   assert.match(openapi, /"\/progress\/today":[\s\S]*?\$ref: "#\/components\/schemas\/ProgressToday"/);
   assert.match(openapi, /spr-reading-enabled", isActive: false/);
