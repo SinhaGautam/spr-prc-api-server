@@ -59,36 +59,39 @@ Returns traditions, devotional focuses, V1 practices, meditation presets, suppor
 ## Feature availability
 - GET /features
 
-Returns only the names of features enabled for V1. Feature availability is a server-owned release configuration, not an individual user's practice preference.
+Returns every feature flag record from the MongoDB `features` collection, including inactive flags. MongoDB is the source of truth; no application-code fallback list is permitted.
 
-Feature flag naming convention:
-- Use the exact format `spr-{feature}-enabled`.
-- Use lowercase ASCII letters and hyphens; do not use underscores or spaces.
-- Use concise, unambiguous feature identifiers without transliteration separators.
-- Keep the `spr-` prefix and `-enabled` suffix consistent for every feature flag.
-- Keep identifiers stable and use the same canonical values in server configuration, API responses, schemas, tests, and clients.
-- Return the full canonical flag name as the feature identifier; do not convert it to a display label.
+Feature document requirements:
+- `key`: stable canonical identifier in the format `spr-{feature}-enabled`; lowercase ASCII letters and hyphens only.
+- `isActive`: required boolean that controls whether the feature is available.
+- `description`: optional human-readable description.
+- `sortOrder`: optional integer used for deterministic ordering.
+- `createdAt`, `updatedAt`: BSON Date timestamps.
 
-V1 enabled feature flags:
-- `spr-naamjaap-enabled`
-- `spr-meditation-enabled`
+V1 feature records seeded for a new database:
+- `spr-naamjaap-enabled` with `isActive: true`
+- `spr-meditation-enabled` with `isActive: true`
 
-Response model:
+Example response:
 ```json
 {
-  "features": ["spr-naamjaap-enabled", "spr-meditation-enabled"]
+  "features": [
+    { "key": "spr-naamjaap-enabled", "isActive": true },
+    { "key": "spr-meditation-enabled", "isActive": true }
+  ]
 }
 ```
 
 Contract requirements:
-- Authentication is required; derive the principal from the authentication middleware.
+- Authentication is required; derive the principal from authentication middleware.
 - No request body, query parameters, or client-provided user ID is accepted.
-- Response uses a module-owned response model and Zod response schema.
-- Return only enabled feature flag names; do not include disabled feature flags or per-feature boolean values.
-- Feature toggles do not create, restore, or expose Reading or Songs endpoints, modules, content, preferences, or data.
-- Disabled features must be treated by clients as unavailable. Server routing and authorization remain authoritative; hiding a UI element is not access control.
-- Log request ID, route, outcome, and a safe user identifier as available; do not log secrets or user content.
-- Tests cover the exact V1 enabled feature names, response validation, authentication failure, and absence of Reading/Songs route exposure.
+- Response uses a module-owned response model and strict Zod response schema.
+- The response contains both active and inactive feature records; clients use `isActive` to decide visibility/availability.
+- All feature listing comes from MongoDB. Database failures or malformed records fail the request; never silently fall back to hard-coded defaults.
+- A disabled feature flag does not reintroduce or expose removed Reading/Songs modules or endpoints.
+- Server routing and authorization remain authoritative; hiding a UI element is not access control.
+- Log request ID, route, outcome, and safe user identifier as available; do not log secrets or user content.
+- Tests cover active/inactive records, stable ordering, response validation, database failure behavior, authentication failure, and absence of Reading/Songs route exposure.
 
 ## User profile
 - GET /me
