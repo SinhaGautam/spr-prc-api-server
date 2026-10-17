@@ -264,8 +264,6 @@ src/modules/naam-jap/presentation/requests/
 
 ``` text
 CreateNaamJapSessionRequest {
-  mantraId?: string
-  mantraText?: string
   targetRepetitions: number
   completedRepetitions: number
   startedAt: string
@@ -290,25 +288,16 @@ src/modules/naam-jap/presentation/responses/
 ``` text
 CreateNaamJapSessionResponse {
   id: string
-  mantra: {
-    id?: string
-    text: string
-  }
   completedRepetitions: number
   targetRepetitions: number
   completed: boolean
   startedAt: string
   endedAt?: string
-  dailyProgress: {
-    repetitions: number
-    targetRepetitions: number
-    completed: boolean
-  }
 }
 ```
 
 The response is designed for the mobile use case, not copied from
-MongoDB.
+MongoDB. For V1, Naam Jap session creation has no mantra catalogue dependency. The client owns the displayed devotional name; the API stores repetition and timing results only. Legacy historical session snapshots may remain readable.
 
 # 6. Zod schema location
 
