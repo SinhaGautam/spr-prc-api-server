@@ -51,3 +51,24 @@ test("feature availability is MongoDB-backed and V1 seed includes active feature
   assert.match(seed, /_id: 'spr-song-enabled',[\s\S]*?isActive: false/);
   assert.match(seed, /collectionName === 'features'/);
 });
+
+
+test("Naam Jap V1 does not expose or depend on a mantra catalogue", () => {
+  const routes = fs.readFileSync(path.join(root, "src", "modules", "naam-jap", "routes.ts"), "utf8");
+  const service = fs.readFileSync(path.join(root, "src", "modules", "naam-jap", "application", "NaamJapService.ts"), "utf8");
+  const repository = fs.readFileSync(path.join(root, "src", "modules", "naam-jap", "application", "NaamJapRepository.ts"), "utf8");
+  const home = fs.readFileSync(path.join(root, "src", "modules", "home", "application", "HomeService.ts"), "utf8");
+  const schema = fs.readFileSync(path.join(root, "src", "modules", "naam-jap", "schemas", "NaamJapSchema.ts"), "utf8");
+  const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
+  const seed = fs.readFileSync(path.join(root, "scripts", "seed-mongo.mjs"), "utf8");
+  const indexes = fs.readFileSync(path.join(root, "src", "infrastructure", "mongodb", "MongoIndexes.ts"), "utf8");
+
+  assert.doesNotMatch(routes, /\/mantras/);
+  assert.doesNotMatch(service, /listMantras|mantraId|mantraText|mantras/);
+  assert.doesNotMatch(repository, /listMantras|MantraEntity|mantras/);
+  assert.doesNotMatch(home, /listMantras|defaultMantra/);
+  assert.doesNotMatch(schema, /mantraId|mantraText|mantraResponseSchema/);
+  assert.doesNotMatch(openapi, /"\/mantras"|summary: "List published mantras"|mantra-hare-krishna/);
+  assert.doesNotMatch(seed, /^\s*mantras:\s*\[/m);
+  assert.doesNotMatch(indexes, /\["mantras"/);
+});
