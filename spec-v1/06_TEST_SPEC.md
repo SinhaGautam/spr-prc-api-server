@@ -27,6 +27,19 @@ Test supported/unsupported presets, completed/interrupted sessions, duplicate cl
 - seed data contains no reading/song/playback/favorite records
 - no legacy feature module is imported by V1
 
+## Authentication and installation lifecycle
+- First POST /auth/session creates one anonymous user, installation record, generated username, and opaque access session without requiring displayName.
+- Repeating bootstrap with the same installation ID and secret returns the same user and a new session token.
+- Repeating bootstrap with an incorrect installation secret returns 401 and creates no new session.
+- Malformed UUID, short installation secret, invalid platform, and unknown request fields are rejected.
+- The bearer token is never stored raw; session lookup hashes the supplied token.
+- Session expires after 15 minutes and expired/revoked tokens cannot access protected routes.
+- DELETE /auth/session revokes the current token; subsequent protected calls return 401.
+- Parallel first-launch requests cannot create duplicate users/installations; duplicate-key races resolve safely or return a retryable conflict without overwriting a registered installation secret.
+- Generated username is stable for an installation and does not function as a credential.
+- Device metadata is optional/untrusted; push tokens are not used for authentication.
+- Reset-local-data semantics preserve installation credentials; “start fresh” generates a new installation identity and does not delete server data.
+
 ## API integration
 Every V1 endpoint: success, validation failure, auth failure, authorization failure where relevant, not found, duplicate/idempotency, dependency failure where meaningful. Also assert removed paths are not registered.
 
