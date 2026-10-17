@@ -22,21 +22,21 @@ Returns traditions, devotional focuses, V1 practices, meditation presets, suppor
 Returns only the names of features enabled for V1. Feature availability is a server-owned release configuration, not an individual user's practice preference.
 
 Feature flag naming convention:
-- Use lowercase `snake_case` identifiers containing only ASCII letters, digits, and underscores.
-- Use descriptive, domain-specific capability names rather than abbreviated, transliterated, or overly broad labels.
-- Keep related feature names parallel in structure; name the practice/capability, not its boolean state.
-- Do not add redundant suffixes such as `_enabled` or `_disabled`.
+- Use the exact format `spr-{feature}-enabled`.
+- Use lowercase ASCII letters and hyphens; do not use underscores or spaces.
+- Use concise, unambiguous feature identifiers without transliteration separators.
+- Keep the `spr-` prefix and `-enabled` suffix consistent for every feature flag.
 - Keep identifiers stable and use the same canonical values in server configuration, API responses, schemas, tests, and clients.
-- Do not use display labels, version numbers, or environment names as part of feature identifiers.
+- Return the full canonical flag name as the feature identifier; do not convert it to a display label.
 
-V1 enabled feature names:
-- `mantra_practice`
-- `meditation_practice`
+V1 enabled feature flags:
+- `spr-naamjaap-enabled`
+- `spr-meditation-enabled`
 
 Response model:
 ```json
 {
-  "features": ["mantra_practice", "meditation_practice"]
+  "features": ["spr-naamjaap-enabled", "spr-meditation-enabled"]
 }
 ```
 
@@ -44,7 +44,7 @@ Contract requirements:
 - Authentication is required; derive the principal from the authentication middleware.
 - No request body, query parameters, or client-provided user ID is accepted.
 - Response uses a module-owned response model and Zod response schema.
-- Return only enabled feature names; do not include disabled feature names or per-feature boolean values.
+- Return only enabled feature flag names; do not include disabled feature flags or per-feature boolean values.
 - Feature toggles do not create, restore, or expose Reading or Songs endpoints, modules, content, preferences, or data.
 - Disabled features must be treated by clients as unavailable. Server routing and authorization remain authoritative; hiding a UI element is not access control.
 - Log request ID, route, outcome, and a safe user identifier as available; do not log secrets or user content.
