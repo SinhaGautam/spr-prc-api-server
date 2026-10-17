@@ -1,3 +1,4 @@
+import { ConflictError } from "../../../lib/errors";
 import type { UserRepository } from "../application/UserRepository";
 import type { UserEntity } from "../entities/UserEntity";
 
@@ -39,6 +40,8 @@ export class InMemoryUserRepository implements UserRepository {
   }
 
   async create(user: UserEntity): Promise<UserEntity> {
+    const duplicate = await this.findByAuth(user.authProvider, user.authSubject);
+    if (duplicate) throw new ConflictError("User identity already exists");
     this.users.set(String(user._id), user);
     return user;
   }
