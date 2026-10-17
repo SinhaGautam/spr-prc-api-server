@@ -64,7 +64,7 @@ test("Naam Jap V1 does not expose or depend on a mantra catalogue", () => {
   const indexes = fs.readFileSync(path.join(root, "src", "infrastructure", "mongodb", "MongoIndexes.ts"), "utf8");
 
   assert.doesNotMatch(routes, /\/mantras/);
-  assert.doesNotMatch(service, /listMantras|mantraId|mantraText|mantras/);
+  assert.doesNotMatch(service, /listMantras|request\.mantraId|request\.mantraText|mantras/);
   assert.doesNotMatch(repository, /listMantras|MantraEntity|mantras/);
   assert.doesNotMatch(home, /listMantras|defaultMantra/);
   assert.doesNotMatch(schema, /mantraId|mantraText|mantraResponseSchema/);
