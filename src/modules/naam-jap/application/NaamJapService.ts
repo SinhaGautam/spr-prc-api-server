@@ -5,23 +5,32 @@ import type { CreateNaamJapSessionRequest } from "../contracts/NaamJapRequest";
 import { NaamJapSessionEntity } from "../entities/NaamJapSessionEntity";
 import type { NaamJapRepository } from "./NaamJapRepository";
 import type { PracticeCompletionPort } from "../../daily-practice/application/PracticeCompletionPort";
+import type { FeatureAvailabilityService } from "../../features/application/FeatureAvailabilityService";
+
+const FEATURE_KEY = "spr-naamjaap-enabled";
 
 export class NaamJapService extends BaseApiService {
   constructor(
     private readonly repository: NaamJapRepository,
     private readonly completionPort: PracticeCompletionPort,
+    private readonly featureAvailability: FeatureAvailabilityService,
   ) { super(); }
 
   async listMantras() {
-    return this.execute("naamJap.listMantras", async () => ({
-      items: (await this.repository.listMantras()).map((item) => ({ id: item._id, name: item.name, text: item.text, language: item.language })),
-    }));
+    return this.execute("naamJap.listMantras", async () => {
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
+      return {
+        items: (await this.repository.listMantras()).map((item) => ({ id: item._id, name: item.name, text: item.text, language: item.language })),
+      };
+    });
   }
 
   async createSession(userId: string, request: CreateNaamJapSessionRequest) {
     return this.execute("naamJap.createSession", async () => {
+      // Preserve idempotent retries for sessions that were already accepted.
       const existing = await this.repository.findByClientSessionId(userId, request.clientSessionId);
       if (existing) return { session: this.toResponse(existing), idempotent: true };
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Naam Jap");
       if (request.completedRepetitions > request.targetRepetitions) throw new ConflictError("Completed repetitions cannot exceed target repetitions");
 
       const mantras = await this.repository.listMantras();
