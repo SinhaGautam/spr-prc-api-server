@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BaseApiService } from "../../../core/application/BaseApiService";
-import { ConflictError, NotFoundError } from "../../../lib/errors";
+import { ConflictError } from "../../../lib/errors";
 import type { CreateNaamJapSessionRequest } from "../contracts/NaamJapRequest";
 import { NaamJapSessionEntity } from "../entities/NaamJapSessionEntity";
 import type { NaamJapRepository } from "./NaamJapRepository";
