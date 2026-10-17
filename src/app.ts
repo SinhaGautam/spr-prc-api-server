@@ -4,6 +4,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./core/logging/Logger";
 import { E } from "./core/config/Environment";
+import { v1OpenApiDocument } from "./openapi/v1";
 import { authenticationMiddleware } from "./middleware/auth";
 import { rateLimitMiddleware } from "./middleware/rate-limit";
 import { requestIdMiddleware } from "./middleware/request-id";
@@ -37,8 +38,43 @@ app.use(cors({
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(rateLimitMiddleware({ windowMs: 60_000, maxRequests: 120 }));
-app.use(authenticationMiddleware);
 
+// API documentation is intentionally available only in development.
+if (E.NODE_ENV === "development") {
+  app.get("/api-docs/openapi.json", (_req, res) => {
+    res.json(v1OpenApiDocument);
+  });
+
+  app.get("/api-docs", (_req, res) => {
+    res.type("html").send(`<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bhakti App API — Swagger UI</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"
+    />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      SwaggerUIBundle({
+        url: "/api-docs/openapi.json",
+        dom_id: "#swagger-ui",
+        deepLinking: true,
+        displayRequestDuration: true,
+        persistAuthorization: false
+      });
+    </script>
+  </body>
+</html>`);
+  });
+}
+
+app.use(authenticationMiddleware);
 app.use("/api", router);
 
 app.use((req, res) => {
