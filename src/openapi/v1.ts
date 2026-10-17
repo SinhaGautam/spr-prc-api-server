@@ -87,11 +87,20 @@ export const v1OpenApiDocument = {
         expiresAt: string("Token expiration timestamp.", "date-time"),
       }, ["token", "expiresAt"]),
       User: object({
-        id: string(), displayName: string(), provider: string(),
+        id: string(), username: string(), displayName: string(), provider: string(),
         status: { type: "string", enum: ["active", "inactive", "suspended"] },
         timezone: string(), language: string(),
-      }, ["id", "displayName", "provider", "status", "timezone", "language"]),
-      AuthResponse: object({ session: { $ref: "#/components/schemas/AuthSession" }, user: { $ref: "#/components/schemas/User" } }, ["session", "user"]),
+      }, ["id", "username", "provider", "status", "timezone", "language"]),
+      Installation: object({
+        installationId: string(undefined, "uuid"),
+        platform: { type: "string", enum: ["android", "ios"] },
+        createdAt: string(undefined, "date-time"),
+      }, ["installationId", "platform", "createdAt"]),
+      AuthResponse: object({
+        session: { $ref: "#/components/schemas/AuthSession" },
+        user: { $ref: "#/components/schemas/User" },
+        installation: { $ref: "#/components/schemas/Installation" },
+      }, ["session", "user", "installation"]),
       UpdateProfileRequest: object({
         displayName: { type: "string", minLength: 1, maxLength: 100, example: "Demo User" },
         email: { type: "string", format: "email", example: "demo@example.com" },
