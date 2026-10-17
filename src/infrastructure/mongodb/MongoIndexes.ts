@@ -16,7 +16,6 @@ const indexes = [
   ["focuses", { status: 1, sortOrder: 1 }, {}],
   ["focuses", { traditionIds: 1, status: 1 }, {}],
   ["tags", { status: 1, type: 1 }, {}],
-  ["mantras", { status: 1, language: 1, createdAt: -1 }, {}],
   ["naam_jap_sessions", { userId: 1, clientSessionId: 1 }, { unique: true }],
   ["naam_jap_sessions", { userId: 1, startedAt: -1 }, {}],
   ["meditation_presets", { status: 1, sortOrder: 1 }, {}],
