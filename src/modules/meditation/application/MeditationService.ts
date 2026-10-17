@@ -5,15 +5,22 @@ import type { CreateMeditationSessionRequest } from "../contracts/MeditationRequ
 import type { MeditationRepository } from "./MeditationRepository";
 import { MeditationSessionEntity } from "../entities/MeditationSessionEntity";
 import type { PracticeCompletionPort } from "../../daily-practice/application/PracticeCompletionPort";
+import type { FeatureAvailabilityService } from "../../features/application/FeatureAvailabilityService";
+
+const FEATURE_KEY = "spr-meditation-enabled";
 
 export class MeditationService extends BaseApiService {
   constructor(
     private readonly repository: MeditationRepository,
     private readonly completionPort: PracticeCompletionPort,
+    private readonly featureAvailability: FeatureAvailabilityService,
   ) { super(); }
+
+  isEnabled(): Promise<boolean> { return this.featureAvailability.isActive(FEATURE_KEY); }
 
   async listPresets() {
     return this.execute("meditation.listPresets", async () => {
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Meditation");
       const presets = await this.repository.listPresets();
       return { items: presets.map((item) => ({ id: String(item._id), key: item.key, durationMinutes: item.durationMinutes })) };
     });
@@ -23,25 +30,21 @@ export class MeditationService extends BaseApiService {
     return this.execute("meditation.createSession", async () => {
       const existing = await this.repository.findSessionByClientSessionId(userId, request.clientSessionId);
       if (existing) return { session: this.toResponse(existing), idempotent: true };
+      await this.featureAvailability.requireActive(FEATURE_KEY, "Meditation");
       if (request.actualSeconds > request.plannedMinutes * 60) throw new ConflictError("Meditation duration exceeds planned duration");
-
       const session = new MeditationSessionEntity(
         randomUUID(), userId, request.plannedMinutes, request.actualSeconds,
         new Date(request.startedAt), request.completed, request.clientSessionId,
         request.presetId, request.endedAt ? new Date(request.endedAt) : undefined, request.completionReason,
       );
       const saved = await this.repository.createSession(session);
-      if (saved.completed && saved.completionReason === "completed") {
-        await this.completionPort.recordMeditationCompletion(userId, Math.floor(saved.actualSeconds / 60));
-      }
+      if (saved.completed && saved.completionReason === "completed") await this.completionPort.recordMeditationCompletion(userId, Math.floor(saved.actualSeconds / 60));
       return { session: this.toResponse(saved), idempotent: false };
     }, { userId, clientSessionId: request.clientSessionId });
   }
 
   async listSessions(userId: string) {
-    return this.execute("meditation.listSessions", async () => ({
-      items: (await this.repository.listSessions(userId)).map((item) => this.toResponse(item)),
-    }), { userId });
+    return this.execute("meditation.listSessions", async () => ({ items: (await this.repository.listSessions(userId)).map((item) => this.toResponse(item)) }), { userId });
   }
 
   private toResponse(session: MeditationSessionEntity) {

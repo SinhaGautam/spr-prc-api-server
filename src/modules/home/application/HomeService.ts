@@ -12,21 +12,26 @@ export class HomeService extends BaseApiService {
 
   async getTodayView(userId: string) {
     return this.execute("home.getTodayView", async () => {
-      const [goals, presets, mantras] = await Promise.all([
+      const [goals, meditationEnabled, naamJapEnabled] = await Promise.all([
         this.dailyPracticeService.getGoalsToday(userId),
-        this.meditationService.listPresets(),
-        this.naamJapService.listMantras(),
+        this.meditationService.isEnabled(),
+        this.naamJapService.isEnabled(),
       ]);
-      const preset = presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? { id: "preset-15", durationMinutes: 15 };
-      const mantra = mantras.items[0] ?? { id: "mantra-1", name: "Hari Naam", text: "Hare Krishna" };
+      const [presets, mantras] = await Promise.all([
+        meditationEnabled ? this.meditationService.listPresets() : Promise.resolve({ items: [] as Array<{ id: string; key?: string; durationMinutes: number }> }),
+        naamJapEnabled ? this.naamJapService.listMantras() : Promise.resolve({ items: [] as Array<{ id: string; name: string; text: string }> }),
+      ]);
+      const preset = presets.items.find((item) => item.durationMinutes === 15) ?? presets.items[0] ?? null;
+      const mantra = mantras.items[0] ?? null;
+      const availablePractices = new Set([
+        ...(naamJapEnabled ? ["naam_jap"] : []),
+        ...(meditationEnabled ? ["meditation"] : []),
+      ]);
 
       return {
         greeting: "May your practice be gentle and steady.",
-        dailyGoals: goals.goals.map((goal) => ({
-          practice: goal.practice,
-          targetLabel: goal.target,
-          progress: goal.progress,
-          complete: goal.complete,
+        dailyGoals: goals.goals.filter((goal) => availablePractices.has(goal.practice)).map((goal) => ({
+          practice: goal.practice, targetLabel: goal.target, progress: goal.progress, complete: goal.complete,
         })),
         defaultMantra: mantra,
         meditationPreset: preset,

@@ -1,17 +1,17 @@
 import { BaseApiService } from "../../../core/application/BaseApiService";
 import type { PreferencesService } from "../../preferences/application/PreferencesService";
+import type { FeatureAvailabilityService } from "../../features/application/FeatureAvailabilityService";
 import { DailyGoalEntity } from "../entities/DailyGoalEntity";
 import type { DailyPracticeRepository } from "./DailyPracticeRepository";
 import type { PracticeCompletionPort } from "./PracticeCompletionPort";
 
-function today(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+function today(): string { return new Date().toISOString().slice(0, 10); }
 
 export class DailyPracticeService extends BaseApiService implements PracticeCompletionPort {
   constructor(
     private readonly repository: DailyPracticeRepository,
     private readonly preferencesService: PreferencesService,
+    private readonly featureAvailability: FeatureAvailabilityService,
   ) { super(); }
 
   async getGoalsToday(userId: string) {
@@ -31,13 +31,13 @@ export class DailyPracticeService extends BaseApiService implements PracticeComp
 
   async getProgressToday(userId: string) {
     return this.execute("dailyPractice.getProgressToday", async () => {
-      const goal = await this.repository.get(userId, today());
+      const goal = await this.getOrCreateToday(userId);
       return {
         date: today(),
-        completed: goal?.allComplete ?? false,
+        completed: goal.allComplete,
         breakdown: {
-          naam_jap: goal?.naamJapComplete ?? false,
-          meditation: goal?.meditationComplete ?? false,
+          naam_jap: goal.enabledPractices.includes("naam_jap") && goal.naamJapComplete,
+          meditation: goal.enabledPractices.includes("meditation") && goal.meditationComplete,
         },
       };
     }, { userId });
@@ -69,37 +69,46 @@ export class DailyPracticeService extends BaseApiService implements PracticeComp
     if (repetitions <= 0) return;
     const goal = await this.getOrCreateToday(userId);
     if (!goal.enabledPractices.includes("naam_jap")) return;
-    const updated = new DailyGoalEntity(
+    await this.repository.save(new DailyGoalEntity(
       goal.userId, goal.date, goal.enabledPractices, goal.naamJapTarget, goal.meditationTargetMinutes,
       Math.min(goal.naamJapTarget, goal.naamJapProgress + repetitions), goal.meditationProgressMinutes,
-    );
-    await this.repository.save(updated);
+    ));
   }
 
   async recordMeditationCompletion(userId: string, minutes: number): Promise<void> {
     if (minutes <= 0) return;
     const goal = await this.getOrCreateToday(userId);
     if (!goal.enabledPractices.includes("meditation")) return;
-    const updated = new DailyGoalEntity(
+    await this.repository.save(new DailyGoalEntity(
       goal.userId, goal.date, goal.enabledPractices, goal.naamJapTarget, goal.meditationTargetMinutes,
       goal.naamJapProgress, Math.min(goal.meditationTargetMinutes, goal.meditationProgressMinutes + minutes),
-    );
-    await this.repository.save(updated);
+    ));
   }
 
   private async getOrCreateToday(userId: string): Promise<DailyGoalEntity> {
     const date = today();
-    const existing = await this.repository.get(userId, date);
-    if (existing) return existing;
+    const [naamJapActive, meditationActive] = await Promise.all([
+      this.featureAvailability.isActive("spr-naamjaap-enabled"),
+      this.featureAvailability.isActive("spr-meditation-enabled"),
+    ]);
+    const current = await this.repository.get(userId, date);
+    if (current) {
+      const enabledPractices = current.enabledPractices.filter((practice) =>
+        practice === "naam_jap" ? naamJapActive : meditationActive);
+      if (enabledPractices.length === current.enabledPractices.length) return current;
+      const reconciled = new DailyGoalEntity(
+        current.userId, current.date, enabledPractices, current.naamJapTarget, current.meditationTargetMinutes,
+        current.naamJapProgress, current.meditationProgressMinutes,
+      );
+      return this.repository.save(reconciled);
+    }
 
     const preferences = await this.preferencesService.getPreferences(userId);
-    const goal = new DailyGoalEntity(
-      userId,
-      date,
-      preferences.enabledPractices,
-      preferences.naamJapTarget ?? 108,
-      preferences.meditationTargetMinutes ?? 15,
-    );
-    return this.repository.save(goal);
+    const enabledPractices = preferences.enabledPractices.filter((practice) =>
+      practice === "naam_jap" ? naamJapActive : meditationActive);
+    return this.repository.save(new DailyGoalEntity(
+      userId, date, enabledPractices,
+      preferences.naamJapTarget ?? 108, preferences.meditationTargetMinutes ?? 15,
+    ));
   }
 }
