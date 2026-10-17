@@ -102,7 +102,7 @@ A day is complete when every enabled practice reaches its completion criteria. D
 If all practices are disabled, the user has no active daily-practice goal; this must not be treated as failure.
 
 ## 7. Home / Today
-`GET /home/today` is a purpose-built composition endpoint.
+`GET /home` is a purpose-built composition endpoint.
 
 It may return:
 - greeting/context

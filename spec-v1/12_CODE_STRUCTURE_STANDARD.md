@@ -120,7 +120,7 @@ Reading, Songs, Favorites, playback, and reading-progress modules are not presen
 
 ## Public V1 routes
 
-/api/v1 contains only the approved API: /auth/session, /bootstrap, /home/today, /me, /me/preferences, /mantras, /naam-jap/sessions, /meditation/presets, /meditation/sessions, /goals/today, /progress/today, /progress/history, /progress/streak, /me/reminder, /devices, /devices/:deviceId, /health/live, /health/ready.
+/api/v1 contains only the approved API: /auth/session, /bootstrap, /features, /home, /user, /preferences, /naam-jap/sessions, /meditation/presets, /meditation/sessions, /daily-practice/goals/today, /progress/today, /progress/history, /progress/streak, /reminder, /devices, /devices/:deviceId, /health/live, /health/ready.
 
 No generic public content route is mounted because it is not part of the approved API specification.
 

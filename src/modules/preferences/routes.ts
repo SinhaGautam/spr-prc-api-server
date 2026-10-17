@@ -5,7 +5,7 @@ import { PreferencesController } from "./controllers/PreferencesController";
 
 export function createPreferencesRoutes(controller: PreferencesController): IRouter {
   const router = Router();
-  router.get("/preferences", requireAuthentication, asyncHandler((req, res) => controller.get(req, res)));
-  router.put("/preferences", requireAuthentication, asyncHandler((req, res) => controller.update(req, res)));
+  router.get("/", requireAuthentication, asyncHandler((req, res) => controller.get(req, res)));
+  router.put("/", requireAuthentication, asyncHandler((req, res) => controller.update(req, res)));
   return router;
 }

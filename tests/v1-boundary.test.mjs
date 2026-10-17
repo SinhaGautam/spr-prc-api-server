@@ -84,10 +84,10 @@ test("registered profile and preference routes match the OpenAPI paths", () => {
   assert.match(routes, /v1Router\.use\("\/preferences", preferencesRouter\)/);
   assert.match(userRoutes, /router\.get\("\/"/);
   assert.match(userRoutes, /router\.put\("\/"/);
-  assert.match(preferenceRoutes, /router\.get\("\/preferences"/);
-  assert.match(preferenceRoutes, /router\.put\("\/preferences"/);
+  assert.match(preferenceRoutes, /router\.get\("\/"/);
+  assert.match(preferenceRoutes, /router\.put\("\/"/);
   assert.match(openapi, /"\/user":/);
-  assert.match(openapi, /"\/preferences\/preferences":/);
+  assert.match(openapi, /"\/preferences":/);
 });
 
 test("OpenAPI documents concrete response contracts for bootstrap, home, and goals", () => {
@@ -97,9 +97,25 @@ test("OpenAPI documents concrete response contracts for bootstrap, home, and goa
   assert.match(openapi, /DailyGoals: object/);
   assert.match(openapi, /tags: \{ type: "array", items: object\(\{ id: string\(\), key: string\(\), name: string\(\), type: string\(\) \}/);
   assert.match(openapi, /"\/bootstrap":[\s\S]*?\$ref: "#\/components\/schemas\/BootstrapResponse"/);
-  assert.match(openapi, /"\/home\/today":[\s\S]*?\$ref: "#\/components\/schemas\/HomeTodayResponse"/);
-  assert.match(openapi, /"\/goals\/today":[\s\S]*?\$ref: "#\/components\/schemas\/DailyGoals"/);
+  assert.match(openapi, /"\/home":[\s\S]*?\$ref: "#\/components\/schemas\/HomeTodayResponse"/);
+  assert.match(openapi, /"\/daily-practice\/goals\/today":[\s\S]*?\$ref: "#\/components\/schemas\/DailyGoals"/);
   assert.match(openapi, /"\/progress\/today":[\s\S]*?\$ref: "#\/components\/schemas\/ProgressToday"/);
   assert.match(openapi, /spr-reading-enabled", isActive: false/);
   assert.match(openapi, /spr-song-enabled", isActive: false/);
+});
+
+test("documented endpoint paths match the mounted module routes", () => {
+  const routes = fs.readFileSync(path.join(root, "src", "routes", "index.ts"), "utf8");
+  const dailyPracticeRoutes = fs.readFileSync(path.join(root, "src", "modules", "daily-practice", "routes.ts"), "utf8");
+  const notificationRoutes = fs.readFileSync(path.join(root, "src", "modules", "notifications", "routes.ts"), "utf8");
+  const spec = fs.readFileSync(path.join(root, "spec-v1", "03_API_SPEC.md"), "utf8");
+  const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
+
+  assert.match(routes, /v1Router\.use\("\/daily-practice", dailyPracticeRouter\)/);
+  assert.match(dailyPracticeRoutes, /router\.get\("\/goals\/today"/);
+  assert.match(notificationRoutes, /router\.put\("\/reminder"/);
+  assert.match(spec, /GET \/daily-practice\/goals\/today/);
+  assert.match(spec, /PUT \/reminder/);
+  assert.match(openapi, /"\/daily-practice\/goals\/today":/);
+  assert.match(openapi, /"\/reminder":/);
 });

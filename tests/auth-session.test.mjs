@@ -55,7 +55,7 @@ test("anonymous installation session is stable, revocable, and does not require 
   });
   assert.equal(invalidSecretResponse.status, 401);
 
-  const profileResponse = await fetch(`${baseUrl}/me`, {
+  const profileResponse = await fetch(`${baseUrl}/user`, {
     headers: { authorization: `Bearer ${second.session.token}` },
   });
   assert.equal(profileResponse.status, 200);
@@ -66,7 +66,7 @@ test("anonymous installation session is stable, revocable, and does not require 
   });
   assert.equal(logoutResponse.status, 204);
 
-  const revokedProfileResponse = await fetch(`${baseUrl}/me`, {
+  const revokedProfileResponse = await fetch(`${baseUrl}/user`, {
     headers: { authorization: `Bearer ${second.session.token}` },
   });
   assert.equal(revokedProfileResponse.status, 401);

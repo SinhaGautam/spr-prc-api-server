@@ -235,7 +235,7 @@ export const v1OpenApiDocument = {
         },
       },
     },
-    "/home/today": {
+    "/home": {
       get: { tags: ["Home"], summary: "Today view", operationId: "getTodayView", responses: { "200": response("Today home view.", { $ref: "#/components/schemas/HomeTodayResponse" }, { greeting: "May your practice be gentle and steady.", dailyGoals: [{ practice: "naam_jap", targetLabel: "108 repetitions", progress: 0, complete: false }, { practice: "meditation", targetLabel: "10 minutes", progress: 0, complete: false }], meditationPreset: { id: "preset-10", key: "ten_minutes", durationMinutes: 10 } }), ...standardErrors } },
     },
     "/user": {
@@ -246,7 +246,7 @@ export const v1OpenApiDocument = {
         responses: { "200": response("Profile updated.", { $ref: "#/components/schemas/UserProfile" }, { id: "user-123", displayName: "Demo User", email: "demo@example.com", timezone: "Asia/Kolkata", language: "en", status: "active" }), ...standardErrors },
       },
     },
-    "/preferences/preferences": {
+    "/preferences": {
       get: { tags: ["Profile"], summary: "Get preferences", operationId: "getPreferences", responses: { "200": response("Current preferences.", { $ref: "#/components/schemas/Preferences" }, { userId: "user-123", traditionId: "sanatan", primaryFocusId: "peace", enabledPractices: ["naam_jap", "meditation"], naamJapTarget: 108, meditationTargetMinutes: 10, reminder: { enabled: true, localTime: "07:00" } }), ...standardErrors } },
       put: {
         tags: ["Profile"], summary: "Update preferences", operationId: "updatePreferences",
@@ -277,7 +277,7 @@ export const v1OpenApiDocument = {
       },
       get: { tags: ["Meditation"], summary: "List meditation sessions", operationId: "listMeditationSessions", responses: { "200": response("Sessions for the authenticated user.", { type: "array", items: { $ref: "#/components/schemas/MeditationSession" } }, []), ...standardErrors } },
     },
-    "/goals/today": {
+    "/daily-practice/goals/today": {
       get: { tags: ["Goals & Progress"], summary: "Get todays goals", operationId: "getTodayGoals", responses: { "200": response("Daily goals.", { $ref: "#/components/schemas/DailyGoals" }, { date: "2026-10-17", enabledPractices: ["naam_jap", "meditation"], goals: [{ practice: "naam_jap", target: "108 repetitions", progress: 0, complete: false }, { practice: "meditation", target: "10 minutes", progress: 0, complete: false }], allComplete: false }), ...standardErrors } },
     },
     "/progress/today": {
@@ -293,7 +293,7 @@ export const v1OpenApiDocument = {
     "/progress/streak": {
       get: { tags: ["Goals & Progress"], summary: "Get progress streak", operationId: "getProgressStreak", responses: { "200": response("Current and longest practice streak.", { $ref: "#/components/schemas/Streak" }, { current: 4, longest: 12 }), ...standardErrors } },
     },
-    "/me/reminder": {
+    "/reminder": {
       put: {
         tags: ["Reminders & Devices"], summary: "Update reminder", operationId: "updateReminder",
         requestBody: { required: true, ...json({ $ref: "#/components/schemas/UpdateReminderRequest" }, { enabled: true, localTime: "07:00" }) },

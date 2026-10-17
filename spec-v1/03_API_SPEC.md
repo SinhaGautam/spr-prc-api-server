@@ -98,17 +98,17 @@ Contract requirements:
 - Tests cover active/inactive records, stable ordering, response validation, database failure behavior, authentication failure, and absence of Reading/Songs route exposure.
 
 ## User profile
-- GET /me
-- PUT /me
+- GET /user
+- PUT /user
 
 ## Preferences
-- GET /me/preferences
-- PUT /me/preferences
+- GET /preferences
+- PUT /preferences
 
 Supports tradition, optional focus, enabled V1 practices, targets, reminder, and language-related preferences.
 
 ## Home
-- GET /home/today
+- GET /home
 
 Returns greeting/context, today's goals/progress, and meditation preset. The client owns the displayed devotional name for V1.
 
@@ -128,7 +128,7 @@ The request contains target/completed repetitions, timestamps, duration, complet
 Timer ticks remain client-side. Backend persists session results.
 
 ## Daily goals and progress
-- GET /goals/today
+- GET /daily-practice/goals/today
 - GET /progress/today
 - GET /progress/history
 - GET /progress/streak
@@ -136,7 +136,7 @@ Timer ticks remain client-side. Backend persists session results.
 Only Naam Jap and Meditation contribute to V1 completion and streak calculations.
 
 ## Notifications
-- PUT /me/reminder
+- PUT /reminder
 - POST /devices
 - DELETE /devices/:deviceId
 
