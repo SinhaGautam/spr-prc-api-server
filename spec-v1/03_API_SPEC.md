@@ -23,18 +23,20 @@ Returns only the names of features enabled for V1. Feature availability is a ser
 
 Feature flag naming convention:
 - Use lowercase `snake_case` identifiers containing only ASCII letters, digits, and underscores.
-- Names identify the feature/capability, not its boolean state; do not add redundant suffixes such as `_enabled` or `_disabled`.
+- Use descriptive, domain-specific capability names rather than abbreviated, transliterated, or overly broad labels.
+- Keep related feature names parallel in structure; name the practice/capability, not its boolean state.
+- Do not add redundant suffixes such as `_enabled` or `_disabled`.
 - Keep identifiers stable and use the same canonical values in server configuration, API responses, schemas, tests, and clients.
 - Do not use display labels, version numbers, or environment names as part of feature identifiers.
 
 V1 enabled feature names:
-- `naam_jap`
-- `meditation`
+- `mantra_practice`
+- `meditation_practice`
 
 Response model:
 ```json
 {
-  "features": ["naam_jap", "meditation"]
+  "features": ["mantra_practice", "meditation_practice"]
 }
 ```
 
