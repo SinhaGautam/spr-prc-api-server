@@ -1,7 +1,6 @@
 # API Specification — Backend V1
 
 ## API conventions
-
 Base path: /api/v1.
 
 Authentication derives current user from the authenticated principal. Never trust client-supplied user IDs.
@@ -16,6 +15,40 @@ Every public endpoint has request/response models and Zod schemas, auth policy, 
 - GET /bootstrap
 
 Returns traditions, devotional focuses, V1 practices, meditation presets, supported languages, and reminder defaults.
+
+## Feature availability
+- GET /features
+
+Returns the canonical V1 feature-toggle state for the mobile app. Feature availability is a server-owned release configuration, not an individual user's practice preference.
+
+V1 feature keys and defaults:
+- `naam_jap`: enabled
+- `meditation`: enabled
+- `reading`: disabled
+- `songs`: disabled
+
+Response model:
+```json
+{
+  "version": "v1",
+  "features": {
+    "naam_jap": { "enabled": true },
+    "meditation": { "enabled": true },
+    "reading": { "enabled": false },
+    "songs": { "enabled": false }
+  }
+}
+```
+
+Contract requirements:
+- Authentication is required; derive the principal from the authentication middleware.
+- No request body, query parameters, or client-provided user ID is accepted.
+- Response uses a module-owned response model and Zod response schema.
+- Unknown feature keys are never emitted. The response includes all four keys for a stable client contract.
+- Feature toggles do not create, restore, or expose Reading or Songs endpoints, modules, content, preferences, or data.
+- Disabled feature keys must be treated by clients as unavailable. Server routing and authorization remain authoritative; hiding a UI element is not access control.
+- Log request ID, route, outcome, and a safe user identifier as available; do not log secrets or user content.
+- Tests cover the exact V1 defaults, response validation, authentication failure, and absence of Reading/Songs route exposure.
 
 ## User profile
 - GET /me
