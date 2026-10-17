@@ -67,3 +67,14 @@ Reading and Songs/Bhajans are removed from V1 rather than retained as dormant do
 **Decision:** V1 does not expose a generic favorites feature.
 
 **Reason:** Favorites were primarily coupled to the removed Reading/Song experience and are not required for the Naam Jap + Meditation release.
+
+
+## ADR-011 — MongoDB is the source of truth for feature availability
+
+**Decision:** Store every server feature flag in the `features` collection with a required boolean `isActive`; `GET /features` reads and returns all feature records from MongoDB.
+
+**Reason:** Feature activation can be changed through persisted configuration without deploying new application code. MongoDB is already the system of record and is mandatory at startup.
+
+**Rejected:** Hard-coded feature arrays and in-memory fallback behavior.
+
+**V1 seed:** Naam Jap and Meditation feature records are seeded active for an empty `features` collection. Reading and Songs remain removed from V1 and are not seeded.
