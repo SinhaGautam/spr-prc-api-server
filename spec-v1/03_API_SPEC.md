@@ -19,24 +19,16 @@ Returns traditions, devotional focuses, V1 practices, meditation presets, suppor
 ## Feature availability
 - GET /features
 
-Returns the canonical V1 feature-toggle state for the mobile app. Feature availability is a server-owned release configuration, not an individual user's practice preference.
+Returns only the names of features enabled for V1. Feature availability is a server-owned release configuration, not an individual user's practice preference.
 
-V1 feature keys and defaults:
-- `naam_jap`: enabled
-- `meditation`: enabled
-- `reading`: disabled
-- `songs`: disabled
+V1 enabled feature names:
+- `naam_jap`
+- `meditation`
 
 Response model:
 ```json
 {
-  "version": "v1",
-  "features": {
-    "naam_jap": { "enabled": true },
-    "meditation": { "enabled": true },
-    "reading": { "enabled": false },
-    "songs": { "enabled": false }
-  }
+  "features": ["naam_jap", "meditation"]
 }
 ```
 
@@ -44,11 +36,11 @@ Contract requirements:
 - Authentication is required; derive the principal from the authentication middleware.
 - No request body, query parameters, or client-provided user ID is accepted.
 - Response uses a module-owned response model and Zod response schema.
-- Unknown feature keys are never emitted. The response includes all four keys for a stable client contract.
+- Return only enabled feature names; do not include disabled feature names or per-feature boolean values.
 - Feature toggles do not create, restore, or expose Reading or Songs endpoints, modules, content, preferences, or data.
-- Disabled feature keys must be treated by clients as unavailable. Server routing and authorization remain authoritative; hiding a UI element is not access control.
+- Disabled features must be treated by clients as unavailable. Server routing and authorization remain authoritative; hiding a UI element is not access control.
 - Log request ID, route, outcome, and a safe user identifier as available; do not log secrets or user content.
-- Tests cover the exact V1 defaults, response validation, authentication failure, and absence of Reading/Songs route exposure.
+- Tests cover the exact V1 enabled feature names, response validation, authentication failure, and absence of Reading/Songs route exposure.
 
 ## User profile
 - GET /me
