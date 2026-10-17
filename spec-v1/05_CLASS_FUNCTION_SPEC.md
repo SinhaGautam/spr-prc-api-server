@@ -17,31 +17,26 @@ Do not create classes merely to wrap one-line database calls.
 
 ## Recommended backend structure
 
-``` text
+```text
 src/
   modules/
     auth/
-      domain/
+    users/
+    preferences/
+    features/
       application/
+      entities/
       infrastructure/
-      presentation/
-
-    reading/
-      domain/
-      application/
-      infrastructure/
-      presentation/
-
+      controllers/
+      schemas.ts
+      routes.ts
+      index.ts
+    content/
     naam-jap/
     meditation/
     daily-practice/
     progress/
-    songs/
-    favorites/
-    preferences/
-    content/
     notifications/
-
   shared/
     domain/
     application/
@@ -52,193 +47,92 @@ src/
 
 ### Controller / route handler
 
-Allowed: - parse request - invoke application service - map result to
-HTTP response
+Allowed: parse request, invoke application service, and map result to HTTP response.
 
-Forbidden: - business calculations - MongoDB queries - authorization
-logic beyond calling the authorization policy
+Forbidden: business calculations, MongoDB queries, or authorization logic beyond invoking the authorization policy.
 
 ### Application service / use case
 
-Allowed: - orchestrate domain operations - transaction boundaries -
-repository calls - idempotency handling - cross-module application
-workflows
+Allowed: orchestrate domain operations, transaction boundaries, repository calls, idempotency handling, and cross-module application workflows.
 
 ### Domain service / policy
 
-Allowed: - pure business rules - completion calculation - streak
-calculation - target validation - content selection policy
+Allowed: pure business rules such as completion calculation, streak calculation, target validation, and content selection policy.
 
-Preferred characteristics: - deterministic - dependency-light - easy to
-unit test
+Preferred characteristics: deterministic, dependency-light, and easy to unit test.
 
 ### Repository
 
-Allowed: - persistence queries - mapping persistence models -
-index-aware query methods
+Allowed: persistence queries, mapping persistence models, and index-aware query methods.
 
-Forbidden: - business decisions - HTTP concerns
+Forbidden: business decisions or HTTP concerns.
 
 ### Infrastructure adapter
 
-Examples: - MongoDB repository implementation - object-storage signer -
-notification provider - authentication provider
+Examples: MongoDB repository implementation, object-storage signer, notification provider, and authentication provider.
 
 ## Required named use cases
 
 At minimum, implementation must have explicit use cases for:
 
-### Reading
-
--   `GetReading`
--   `ListReadings`
--   `UpdateReadingProgress`
--   `CompleteReading`
+### Features
+- `ListFeatures` reads all feature records, including inactive records, from MongoDB.
+- Feature records have a stable canonical `key` and a required boolean `isActive`.
+- No hard-coded or in-memory fallback is permitted.
 
 ### Naam Jap
-
--   `ListMantras`
--   `CreateNaamJapSession`
+- `ListMantras`
+- `CreateNaamJapSession`
 
 ### Meditation
-
--   `ListMeditationPresets`
--   `CreateMeditationSession`
+- `ListMeditationPresets`
+- `CreateMeditationSession`
 
 ### Daily practice
-
--   `GetTodayGoals`
--   `GetTodayProgress`
--   `ApplyPracticeCompletion`
+- `GetTodayGoals`
+- `GetTodayProgress`
+- `ApplyPracticeCompletion`
 
 ### Progress
-
--   `GetProgressHistory`
--   `CalculateCurrentStreak`
--   `CalculateLongestStreak`
-
-### Songs
-
--   `ListSongs`
--   `GetSong`
--   `RecordPlaybackEvent`
-
-### Favorites
-
--   `AddFavorite`
--   `RemoveFavorite`
--   `ListFavorites`
+- `GetProgressHistory`
+- `CalculateCurrentStreak`
+- `CalculateLongestStreak`
 
 ## Function rules
 
-Functions must: - have one clear responsibility - use explicit
-input/output types - reject invalid input at the boundary - avoid hidden
-global state - be deterministic unless they are explicitly
-infrastructure operations - avoid throwing generic untyped errors for
-expected business failures
+Functions must have one clear responsibility, use explicit input/output types, reject invalid input at the boundary, avoid hidden global state, and be deterministic unless they are explicitly infrastructure operations.
 
 ## Error model
 
-Use typed application errors/categories, for example:
-
-``` text
-ValidationError
-UnauthorizedError
-ForbiddenError
-NotFoundError
-ConflictError
-IdempotencyConflictError
-ContentUnavailableError
-DependencyUnavailableError
-```
-
-Map them to HTTP status codes in one presentation-layer policy.
+Use typed application errors/categories, for example `ValidationError`, `UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ConflictError`, `IdempotencyConflictError`, and `DependencyUnavailableError`. Map these to HTTP status codes in one presentation-layer policy.
 
 ## DTO rules
 
-Do not expose MongoDB documents directly.
-
-Use: - request DTOs - response DTOs - persistence models
-
-This protects the API from schema leakage.
+Do not expose MongoDB documents directly. Use request models, response models, and persistence models to prevent schema leakage.
 
 ## Repository interface rule
 
-Domain/application code depends on interfaces such as:
-
-``` text
-ReadingRepository
-NaamJapSessionRepository
-MeditationSessionRepository
-DailyGoalsRepository
-DailyProgressRepository
-SongRepository
-FavoriteRepository
-```
-
-MongoDB implementations live in infrastructure.
+Domain/application code depends on repository interfaces. MongoDB implementations live in infrastructure.
 
 ## Transaction rule
 
-Use MongoDB transactions only where atomicity is genuinely required.
-
-Do not put every request inside a transaction.
-
-For activity completion + daily progress: - prefer an idempotent
-application workflow - use a transaction where the chosen consistency
-model requires it - document the decision in ADR
+Use MongoDB transactions only where atomicity is genuinely required. Document consistency decisions in ADRs.
 
 ## Anti-patterns
 
-Forbidden without an ADR: - generic `BaseRepository<T>` - generic
-`BaseService<T>` - generic `CRUDController<T>` - singleton domain
-state - direct collection access from controllers - `any` for domain
-models - database-specific types leaking through every layer - event bus
-abstractions with no V1 consumer - premature CQRS - event sourcing
+Forbidden without an ADR: generic `BaseRepository<T>`, generic `BaseService<T>`, generic `CRUDController<T>`, singleton domain state, direct collection access from controllers, `any` for domain models, premature CQRS, and event sourcing.
 
+## Application context, logging and errors
 
-## 19. Application context, logging and errors
+HTTP-triggered application use cases should receive explicit application context where required. Application services must emit meaningful success/failure logs. Errors must be propagated; never silently convert failures into success.
 
-HTTP-triggered application use cases should receive explicit application context where required, including `requestId`, actor/principal, logger, and clock.
+## try/catch/finally
 
-Application services must emit meaningful success/failure logs according to `05B_ERROR_LOGGING_TRACE_SPEC.md`.
+- No blanket catch-and-rethrow.
+- Catch only for translation, recovery, meaningful context, or documented policy.
+- Preserve original error as `cause`.
+- Use `finally` only for owned resource/state cleanup.
 
-Errors must be propagated; never silently convert failures into success.
+## File and type naming convention
 
-## 20. try/catch/finally
-
-- no blanket catch-and-rethrow
-- catch only for translation, recovery, meaningful context, or documented policy
-- preserve original error as `cause`
-- use `finally` only for owned resource/state cleanup
-- controllers rely on centralized error handling
-
-
-## 22. File and type naming convention
-
-Use:
-- files: `kebab-case`
-- classes/types/interfaces: `PascalCase`
-- functions/constants: `camelCase`
-- Zod schema constants: `camelCase` ending in `Schema`
-
-Examples:
-
-```text
-create-reading.use-case.ts
-CreateReading
-
-create-reading.request.ts
-CreateReadingRequest
-
-create-reading.response.ts
-CreateReadingResponse
-
-create-reading.schema.ts
-createReadingRequestSchema
-createReadingResponseSchema
-```
-
-Request/response files belong inside the owning module's `presentation/requests` and `presentation/responses` directories. See `05A_REQUEST_RESPONSE_MODEL_SPEC.md`.
-
-Do not create generic project-wide `dto`, `models`, or `types` dumping grounds.
+Use kebab-case for files, PascalCase for classes/types/interfaces, and camelCase for functions/constants. Request/response files belong to the owning module. Do not create generic project-wide DTO, models, or types dumping grounds.
