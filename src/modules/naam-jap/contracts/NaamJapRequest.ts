@@ -1,6 +1,4 @@
 export interface CreateNaamJapSessionRequest {
-  mantraId?: string;
-  mantraText?: string;
   targetRepetitions: number;
   completedRepetitions: number;
   startedAt: string;
