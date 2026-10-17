@@ -9,6 +9,23 @@
 
 ## Active V1 collections
 
+### `features`
+The `features` collection is the source of truth for server-owned feature availability. Each configured feature flag has exactly one record. Forward-looking Reading and Song flags may be present as inactive metadata, but this does not add their modules, data collections, or endpoints to V1:
+
+```json
+{
+  "_id": "spr-naamjaap-enabled",
+  "key": "spr-naamjaap-enabled",
+  "isActive": true,
+  "description": "Enable Naam Jap practice",
+  "sortOrder": 1,
+  "createdAt": "BSON Date",
+  "updatedAt": "BSON Date"
+}
+```
+
+`key` is a stable canonical identifier matching `spr-{feature}-enabled`; `isActive` is required and must be a BSON boolean. `key` has a unique index; `(isActive, sortOrder)` is indexed for administration and listing. The `/features` endpoint returns every record, including inactive features. A missing MongoDB record is not implicitly active.
+
 ### `users`
 Retained from V1 with identity/profile fields and indexes. V1 anonymous users use `authProvider: "installation"` and `authSubject: installationId`. `username` is generated server-side and unique; `displayName` remains optional and is not requested by the V1 UI.
 

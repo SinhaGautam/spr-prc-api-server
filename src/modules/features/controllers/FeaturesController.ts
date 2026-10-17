@@ -4,10 +4,12 @@ import type { FeaturesService } from "../application/FeaturesService";
 import { featuresResponseSchema } from "../schemas";
 
 export class FeaturesController extends BaseController {
-  constructor(private readonly service: FeaturesService) { super(); }
+  constructor(private readonly service: FeaturesService) {
+    super();
+  }
 
   async list(_req: Request, res: Response): Promise<void> {
-    const response = featuresResponseSchema.parse(await this.service.getEnabledFeatures());
+    const response = featuresResponseSchema.parse(await this.service.getFeatures());
     this.ok(res, response);
   }
 }

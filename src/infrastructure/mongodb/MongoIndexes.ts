@@ -2,6 +2,8 @@ import type { Db } from "mongodb";
 
 const indexes = [
   ["users", { authProvider: 1, authSubject: 1 }, { unique: true }],
+  ["features", { key: 1 }, { unique: true }],
+  ["features", { isActive: 1, sortOrder: 1 }, {}],
   ["users", { username: 1 }, { unique: true, partialFilterExpression: { username: { $type: "string" } } }],
   ["installations", { installationId: 1 }, { unique: true }],
   ["installations", { userId: 1, lastSeenAt: -1 }, {}],

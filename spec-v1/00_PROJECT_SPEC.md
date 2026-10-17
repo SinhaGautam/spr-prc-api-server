@@ -32,7 +32,7 @@ Daily goals, daily progress, history, and streaks are based only on these two pr
 - Reading/song offline cache/sync
 - Song/reading business/application events
 
-These capabilities may be reconsidered as a future version. They must not be represented as inactive V1 modules or endpoints.
+These capabilities may be reconsidered in a future version. Their feature-availability metadata may be seeded as inactive flags, but they must not be implemented as V1 modules, data collections, or endpoints.
 
 ## 3. V1 user journey
 1. First launch
@@ -48,6 +48,8 @@ These capabilities may be reconsidered as a future version. They must not be rep
 11. Return on later days
 
 ## 4. Feature decisions
+Feature availability is stored in the MongoDB `features` collection. Each server feature has a stable `key` and required boolean `isActive`; `GET /features` returns both active and inactive records from MongoDB, with no hard-coded or in-memory fallback. The seed process ensures Naam Jap and Meditation records exist as active by default and Reading and Song flags exist as inactive; existing activation values are preserved.
+
 | Capability | V1 decision |
 |---|---|
 | Home / Today | Required |

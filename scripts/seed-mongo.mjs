@@ -10,6 +10,44 @@ const databaseName = process.env.MONGO_DB_NAME || process.env.MONGODB_DATABASE |
 
 const now = new Date();
 const seed = {
+  features: [
+    {
+      _id: 'spr-naamjaap-enabled',
+      key: 'spr-naamjaap-enabled',
+      isActive: true,
+      description: 'Enable Naam Jap practice',
+      sortOrder: 1,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      _id: 'spr-meditation-enabled',
+      key: 'spr-meditation-enabled',
+      isActive: true,
+      description: 'Enable meditation practice',
+      sortOrder: 2,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      _id: 'spr-reading-enabled',
+      key: 'spr-reading-enabled',
+      isActive: false,
+      description: 'Reading feature reserved for a future release',
+      sortOrder: 3,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      _id: 'spr-song-enabled',
+      key: 'spr-song-enabled',
+      isActive: false,
+      description: 'Song feature reserved for a future release',
+      sortOrder: 4,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ],
   users: [
     {
       _id: 'user-1',
@@ -168,6 +206,15 @@ try {
     if (count === 0) {
       await collection.insertMany(seed[collectionName]);
       console.log(`Seeded ${collectionName}: ${seed[collectionName].length} documents`);
+    } else if (collectionName === 'features') {
+      for (const document of seed.features) {
+        await collection.updateOne(
+          { key: document.key },
+          { $setOnInsert: document },
+          { upsert: true },
+        );
+      }
+      console.log('Ensured V1 feature records exist; existing feature activation values were preserved');
     } else {
       console.log(`Collection ${collectionName} already has ${count} documents; skipped seeding`);
     }

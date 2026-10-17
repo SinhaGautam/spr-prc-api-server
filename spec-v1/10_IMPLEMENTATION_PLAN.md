@@ -14,6 +14,7 @@ Implement only:
 - error model
 - logging/correlation ID
 - MongoDB connection abstraction
+- MongoDB-backed feature availability and indexes
 - health endpoints
 - test infrastructure
 

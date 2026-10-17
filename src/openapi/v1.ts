@@ -203,6 +203,33 @@ export const v1OpenApiDocument = {
         responses: { "200": response("Catalog returned.", { type: "object", additionalProperties: true }, { traditions: [], focuses: [], practices: ["naam_jap", "meditation"] }), ...standardErrors },
       },
     },
+    "/features": {
+      get: {
+        tags: ["Configuration"],
+        summary: "List feature availability",
+        operationId: "listFeatures",
+        description: "Returns all feature flags stored in MongoDB, including inactive flags. The isActive value controls feature availability.",
+        responses: {
+          "200": response(
+            "Feature availability returned.",
+            object({
+              features: {
+                type: "array",
+                items: object({
+                  key: { type: "string", example: "spr-naamjaap-enabled" },
+                  isActive: { type: "boolean", example: true },
+                }, ["key", "isActive"]),
+              },
+            }, ["features"]),
+            { features: [
+              { key: "spr-naamjaap-enabled", isActive: true },
+              { key: "spr-meditation-enabled", isActive: true },
+            ] },
+          ),
+          ...standardErrors,
+        },
+      },
+    },
     "/home/today": {
       get: { tags: ["Home"], summary: "Today view", operationId: "getTodayView", responses: { "200": response("Today's home view.", { type: "object", additionalProperties: true }, { date: "2026-10-17", goals: {}, progress: {} }), ...standardErrors } },
     },
