@@ -80,8 +80,8 @@ test("registered profile and preference routes match the OpenAPI paths", () => {
   const preferenceRoutes = fs.readFileSync(path.join(root, "src", "modules", "preferences", "routes.ts"), "utf8");
   const openapi = fs.readFileSync(path.join(root, "src", "openapi", "v1.ts"), "utf8");
 
-  assert.match(routes, /v1Router\\.use\("\/user", usersRouter\)/);
-  assert.match(routes, /v1Router\\.use\("\/preferences", preferencesRouter\)/);
+  assert.match(routes, /v1Router\.use\("\/user", usersRouter\)/);
+  assert.match(routes, /v1Router\.use\("\/preferences", preferencesRouter\)/);
   assert.match(userRoutes, /router\.get\("\/"/);
   assert.match(userRoutes, /router\.put\("\/"/);
   assert.match(preferenceRoutes, /router\.get\("\/preferences"/);
