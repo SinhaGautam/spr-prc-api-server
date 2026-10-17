@@ -110,16 +110,15 @@ Supports tradition, optional focus, enabled V1 practices, targets, reminder, and
 ## Home
 - GET /home/today
 
-Returns greeting/context, today's goals/progress, default mantra, and meditation preset.
+Returns greeting/context, today's goals/progress, and meditation preset. The client owns the displayed devotional name for V1.
 
 Must not expose Reading, Songs, playback, or favorites data.
 
 ## Naam Jap
-- GET /mantras
 - POST /naam-jap/sessions
 - GET /naam-jap/sessions
 
-clientSessionId provides offline-safe idempotency. Backend persists sessions, not individual taps.
+The request contains target/completed repetitions, timestamps, duration, completion state, and `clientSessionId`; it has no `mantraId` or `mantraText`. `clientSessionId` provides offline-safe idempotency. Backend persists sessions, not individual taps.
 
 ## Meditation
 - GET /meditation/presets
