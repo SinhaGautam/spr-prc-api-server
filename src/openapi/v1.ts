@@ -54,7 +54,7 @@ export const v1OpenApiDocument = {
     { name: "Onboarding", description: "Public onboarding catalog." },
     { name: "Home", description: "Authenticated daily overview." },
     { name: "Profile", description: "User profile and preferences." },
-    { name: "Naam Jap", description: "Mantras and Naam Jap practice sessions." },
+    { name: "Naam Jap", description: "Naam Jap counting practice sessions." },
     { name: "Meditation", description: "Meditation presets and practice sessions." },
     { name: "Goals & Progress", description: "Daily goals, progress history and streaks." },
     { name: "Reminders & Devices", description: "Reminder preferences and push notification devices." },
@@ -127,8 +127,6 @@ export const v1OpenApiDocument = {
         reminder: object({ enabled: bool, localTime: string() }, ["enabled", "localTime"]),
       }, ["userId", "traditionId", "enabledPractices", "reminder"]),
       NaamJapSessionRequest: object({
-        mantraId: { type: "string", minLength: 1, example: "mantra-hare-krishna" },
-        mantraText: { type: "string", minLength: 1, maxLength: 1000, example: "Hare Krishna Hare Krishna" },
         targetRepetitions: { type: "integer", minimum: 1, maximum: 100000, example: 108 },
         completedRepetitions: { type: "integer", minimum: 0, maximum: 100000, example: 108 },
         startedAt: { type: "string", format: "date-time", example: "2026-10-17T06:00:00.000Z" },
@@ -140,7 +138,7 @@ export const v1OpenApiDocument = {
       NaamJapSession: object({
         id: string(), userId: string(), targetRepetitions: number(), completedRepetitions: number(),
         startedAt: string(undefined, "date-time"), durationSeconds: number(), completed: bool,
-        clientSessionId: string(), createdAt: string(undefined, "date-time"), mantraId: string(), mantraTextSnapshot: string(),
+        clientSessionId: string(), createdAt: string(undefined, "date-time"),
         endedAt: string(undefined, "date-time"), idempotent: bool,
       }, ["id", "userId", "targetRepetitions", "completedRepetitions", "startedAt", "durationSeconds", "completed", "clientSessionId", "createdAt"]),
       MeditationSessionRequest: object({
@@ -249,17 +247,11 @@ export const v1OpenApiDocument = {
         responses: { "200": response("Preferences updated.", { $ref: "#/components/schemas/Preferences" }, { userId: "user-123", traditionId: "sanatan", primaryFocusId: "peace", enabledPractices: ["naam_jap", "meditation"], naamJapTarget: 108, meditationTargetMinutes: 10, reminder: { enabled: true, localTime: "07:00" } }), ...standardErrors },
       },
     },
-    "/mantras": {
-      get: {
-        tags: ["Naam Jap"], summary: "List published mantras", operationId: "listMantras", ...publicOperation,
-        responses: { "200": response("Mantra catalog.", object({ items: { type: "array", items: object({ id: string(), name: string(), text: string(), language: string() }, ["id", "name", "text", "language"]) } }, ["items"]), { items: [{ id: "mantra-hare-krishna", name: "Hare Krishna", text: "Hare Krishna Hare Krishna", language: "sa" }] }), ...standardErrors },
-      },
-    },
     "/naam-jap/sessions": {
       post: {
         tags: ["Naam Jap"], summary: "Create Naam Jap session", operationId: "createNaamJapSession",
         description: idempotencyNote,
-        requestBody: { required: true, ...json({ $ref: "#/components/schemas/NaamJapSessionRequest" }, { mantraId: "mantra-hare-krishna", mantraText: "Hare Krishna Hare Krishna", targetRepetitions: 108, completedRepetitions: 108, startedAt: "2026-10-17T06:00:00.000Z", endedAt: "2026-10-17T06:10:00.000Z", durationSeconds: 600, completed: true, clientSessionId: "naam-jap-client-001" }) },
+        requestBody: { required: true, ...json({ $ref: "#/components/schemas/NaamJapSessionRequest" }, { targetRepetitions: 108, completedRepetitions: 108, startedAt: "2026-10-17T06:00:00.000Z", endedAt: "2026-10-17T06:10:00.000Z", durationSeconds: 600, completed: true, clientSessionId: "naam-jap-client-001" }) },
         responses: { "201": response("Session recorded.", { $ref: "#/components/schemas/NaamJapSession" }, { id: "session-123", userId: "user-123", targetRepetitions: 108, completedRepetitions: 108, startedAt: "2026-10-17T06:00:00.000Z", endedAt: "2026-10-17T06:10:00.000Z", durationSeconds: 600, completed: true, clientSessionId: "naam-jap-client-001", createdAt: "2026-10-17T06:10:01.000Z" }), "200": response("Existing session returned for an idempotent retry.", { $ref: "#/components/schemas/NaamJapSession" }), ...standardErrors },
       },
       get: { tags: ["Naam Jap"], summary: "List Naam Jap sessions", operationId: "listNaamJapSessions", responses: { "200": response("Sessions for the authenticated user.", { type: "array", items: { $ref: "#/components/schemas/NaamJapSession" } }, []), ...standardErrors } },
