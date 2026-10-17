@@ -29,6 +29,24 @@ const seed = {
       createdAt: now,
       updatedAt: now,
     },
+    {
+      _id: 'spr-reading-enabled',
+      key: 'spr-reading-enabled',
+      isActive: false,
+      description: 'Reading feature reserved for a future release',
+      sortOrder: 3,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      _id: 'spr-song-enabled',
+      key: 'spr-song-enabled',
+      isActive: false,
+      description: 'Song feature reserved for a future release',
+      sortOrder: 4,
+      createdAt: now,
+      updatedAt: now,
+    },
   ],
   users: [
     {
