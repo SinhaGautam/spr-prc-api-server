@@ -71,13 +71,17 @@ Feature document requirements:
 V1 feature records seeded for a new database:
 - `spr-naamjaap-enabled` with `isActive: true`
 - `spr-meditation-enabled` with `isActive: true`
+- `spr-reading-enabled` with `isActive: false` (availability flag only; no V1 Reading module or endpoint)
+- `spr-song-enabled` with `isActive: false` (availability flag only; no V1 Songs module or endpoint)
 
 Example response:
 ```json
 {
   "features": [
     { "key": "spr-naamjaap-enabled", "isActive": true },
-    { "key": "spr-meditation-enabled", "isActive": true }
+    { "key": "spr-meditation-enabled", "isActive": true },
+    { "key": "spr-reading-enabled", "isActive": false },
+    { "key": "spr-song-enabled", "isActive": false }
   ]
 }
 ```
