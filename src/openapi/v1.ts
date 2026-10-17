@@ -172,11 +172,11 @@ export const v1OpenApiDocument = {
     "/auth/session": {
       post: {
         tags: ["Authentication"], summary: "Create session", operationId: "createSession",
-        description: "Creates or resumes an anonymous user tied to an installation. The client must generate and securely store installationId (UUID) and installationSecret (32+ random bytes encoded as base64url). Repeating the request with the same secret resumes the same user. The returned access token expires in 15 minutes.",
+        description: "Creates or resumes an anonymous user tied to an installation. The client must generate and securely store installationId (UUID) and installationSecret (32+ random bytes encoded as base64url). Do not attach an old Bearer token to this bootstrap request. Repeating the request with the same secret resumes the same user. The returned access token expires in 15 minutes.",
         ...publicOperation,
         requestBody: { required: true, ...json({ $ref: "#/components/schemas/CreateSessionRequest" }, { installationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", installationSecret: "replace-with-32-plus-random-bytes-base64url", platform: "android", appVersion: "1.0.0", language: "en", timezone: "Asia/Kolkata" }) },
         responses: {
-          "201": response("Session created.", { $ref: "#/components/schemas/AuthResponse" }, { session: { token: "opaque-random-token", expiresAt: "2026-10-17T06:15:00.000Z" }, user: { id: "user-123", username: "seeker-7A91B2C4", provider: "installation", status: "active", timezone: "Asia/Kolkata", language: "en" }, installation: { installationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", platform: "android", createdAt: "2026-10-17T06:00:00.000Z" } }),
+          "201": response("Session created.", { $ref: "#/components/schemas/AuthResponse" }, { session: { token: "opaque-random-token", expiresAt: "2026-10-17T06:15:00.000Z" }, user: { id: "user-123", username: "seeker-7A91B2C4D5E6F7A8", provider: "installation", status: "active", timezone: "Asia/Kolkata", language: "en" }, installation: { installationId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8", platform: "android", createdAt: "2026-10-17T06:00:00.000Z" } }),
           ...standardErrors,
         },
       },
