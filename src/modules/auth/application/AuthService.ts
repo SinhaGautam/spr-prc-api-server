@@ -52,56 +52,16 @@ export class AuthService extends BaseApiService {
       const now = new Date();
       const secretHash = sha256(input.installationSecret);
       let installation = await this.installationRepository.findById(input.installationId);
-      let user: UserEntity | null;
 
-      if (installation) {
-        if (!safeHashEquals(installation.secretHash, secretHash)) {
-          throw new AuthenticationError("Installation credentials are invalid");
-        }
-        user = await this.userRepository.findById(installation.userId);
-        if (!user) throw new AuthenticationError("Installation is not associated with an active user");
-        if (user.status !== "active") throw new AuthenticationError("User is not active");
-        installation = {
-          ...installation,
-          platform: input.platform,
-          appVersion: input.appVersion,
-          osVersion: input.osVersion,
-          deviceModel: input.deviceModel,
-          language: input.language ?? installation.language,
-          timezone: validTimezone(input.timezone ?? installation.timezone),
-          updatedAt: now,
-          lastSeenAt: now,
-        };
-        await this.installationRepository.update(installation);
-      } else {
-        user = await this.userRepository.findByAuth("installation", input.installationId);
-        if (!user) {
-          const newUser = new UserEntity(
-            randomUUID(),
-            "installation",
-            input.installationId,
-            validTimezone(input.timezone),
-            input.language ?? "en",
-            "active",
-            undefined,
-            undefined,
-            now,
-            now,
-            generatedUsername(),
-          );
-          try {
-            user = await this.userRepository.create(newUser);
-          } catch (error) {
-            if (!isDuplicateKey(error) && !(error instanceof ConflictError)) throw error;
-            user = await this.userRepository.findByAuth("installation", input.installationId);
-            if (!user) throw error;
-          }
-        }
-        if (user.status !== "active") throw new AuthenticationError("User is not active");
+      if (installation && !safeHashEquals(installation.secretHash, secretHash)) {
+        throw new AuthenticationError("Installation credentials are invalid");
+      }
+
+      if (!installation) {
         const newInstallation: Installation = {
           installationId: input.installationId,
           secretHash,
-          userId: String(user._id),
+          userId: randomUUID(),
           platform: input.platform,
           appVersion: input.appVersion,
           osVersion: input.osVersion,
@@ -120,16 +80,27 @@ export class AuthService extends BaseApiService {
           if (!installation || !safeHashEquals(installation.secretHash, secretHash)) {
             throw new AuthenticationError("Installation credentials are invalid");
           }
-          user = await this.userRepository.findById(installation.userId);
-          if (!user) throw new AuthenticationError("Installation is not associated with an active user");
         }
       }
 
-      if (!user) throw new AuthenticationError("Installation is not associated with an active user");
-      if (!user.username) {
-        user.username = generatedUsername();
-        await this.userRepository.update(user);
-      }
+      // Installation is inserted before the user so a concurrent request cannot replace
+      // the winning secret. If the process stopped between writes, a valid retry repairs
+      // the missing user using the userId already bound to this installation.
+      let user = await this.getOrCreateInstallationUser(installation);
+      if (user.status !== "active") throw new AuthenticationError("User is not active");
+
+      const updatedInstallation: Installation = {
+        ...installation,
+        platform: input.platform,
+        appVersion: input.appVersion,
+        osVersion: input.osVersion,
+        deviceModel: input.deviceModel,
+        language: input.language ?? installation.language,
+        timezone: validTimezone(input.timezone ?? installation.timezone),
+        updatedAt: now,
+        lastSeenAt: now,
+      };
+      await this.installationRepository.update(updatedInstallation);
 
       const token = randomBytes(32).toString("base64url");
       const expiresAt = new Date(Date.now() + ACCESS_SESSION_TTL_MS);
@@ -141,7 +112,7 @@ export class AuthService extends BaseApiService {
         session: { token, expiresAt: expiresAt.toISOString() },
         user: {
           id: String(user._id),
-          username: user.username,
+          username: user.username!,
           ...(user.displayName ? { displayName: user.displayName } : {}),
           provider: user.authProvider,
           status: user.status,
@@ -149,12 +120,47 @@ export class AuthService extends BaseApiService {
           language: user.language,
         },
         installation: {
-          installationId: installation.installationId,
-          platform: installation.platform,
-          createdAt: installation.createdAt.toISOString(),
+          installationId: updatedInstallation.installationId,
+          platform: updatedInstallation.platform,
+          createdAt: updatedInstallation.createdAt.toISOString(),
         },
       };
     }, { installationId: input.installationId, platform: input.platform });
+  }
+
+  private async getOrCreateInstallationUser(installation: Installation): Promise<UserEntity> {
+    let user = await this.userRepository.findById(installation.userId);
+    if (!user) {
+      const candidate = new UserEntity(
+        installation.userId,
+        "installation",
+        installation.installationId,
+        installation.timezone,
+        installation.language,
+        "active",
+        undefined,
+        undefined,
+        installation.createdAt,
+        installation.updatedAt,
+        generatedUsername(),
+      );
+      try {
+        user = await this.userRepository.create(candidate);
+      } catch (error) {
+        if (!isDuplicateKey(error) && !(error instanceof ConflictError)) throw error;
+        user = await this.userRepository.findById(installation.userId);
+        if (!user) throw new ConflictError("Installation bootstrap is in progress; retry the request");
+      }
+    }
+
+    if (user.authProvider !== "installation" || user.authSubject !== installation.installationId) {
+      throw new AuthenticationError("Installation is not associated with this user");
+    }
+    if (!user.username) {
+      user.username = generatedUsername();
+      user = await this.userRepository.update(user);
+    }
+    return user;
   }
 
   async revokeSession(token: string): Promise<void> {
