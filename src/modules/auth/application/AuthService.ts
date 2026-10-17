@@ -92,7 +92,7 @@ export class AuthService extends BaseApiService {
           try {
             user = await this.userRepository.create(newUser);
           } catch (error) {
-            if (!isDuplicateKey(error)) throw error;
+            if (!isDuplicateKey(error) && !(error instanceof ConflictError)) throw error;
             user = await this.userRepository.findByAuth("installation", input.installationId);
             if (!user) throw error;
           }
